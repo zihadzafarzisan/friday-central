@@ -1,0 +1,112 @@
+<style>
+  .mockup { background: #000; border: 1px solid rgba(255,255,255,.2); box-shadow: 0 24px 80px rgba(0,0,0,.34); }
+  .mockup-body { padding: 0; overflow: hidden; }
+  .shell { min-height: 620px; position: relative; display: grid; grid-template-columns: 236px 1fr; overflow: hidden; color: #fff; background: #000; font-family: Inter, system-ui, sans-serif; }
+  .shell.light { color: #000; background: #fff; }
+  .sidebar { position: relative; z-index: 1; display: flex; flex-direction: column; margin: 14px; padding: 15px 0; background: transparent; transition: width .2s ease; }
+  .sidebar.collapsed { width: 58px; }
+  .logo-slot { height: 54px; width: calc(100% - 30px); margin: 0 15px 25px; display: grid; place-items: center; border: 1px dashed rgba(255,255,255,.35); border-radius: 16px; color: #8b8b8b; font-size: 10px; text-align: center; }
+  .light .logo-slot { border-color: rgba(0,0,0,.3); color: #707070; }
+  .section-title { margin: 12px 14px 6px; color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+  .light .section-title { color: #000; }
+  .service-list { display: grid; gap: 2px; }
+  .service-list button, .sub-list button, .toggle { min-height: 38px; display: flex; align-items: center; gap: 10px; border: 0; border-radius: 8px; padding: 7px 14px; color: #dedede; background: transparent; text-align: left; font: 500 13px Inter, sans-serif; cursor: pointer; }
+  .light .service-list button, .light .sub-list button { color: #222; }
+  .service-list button:hover, .service-list button:focus-visible, .sub-list button:hover, .sub-list button:focus-visible { color: #fff; background: rgba(255,255,255,.08); }
+  .light .service-list button:hover, .light .service-list button:focus-visible, .light .sub-list button:hover, .light .sub-list button:focus-visible { color: #000; background: rgba(0,0,0,.06); }
+  .sub-list { display: grid; gap: 2px; padding-left: 40px; margin: 2px 0 6px; }
+  .sub-list button { min-height: 32px; font-size: 13px; color: #c4c4c4; padding: 4px 8px; }
+  .light .sub-list button { color: #444; }
+  .nav-icon { width: 17px; height: 17px; display: grid; place-items: center; flex: 0 0 17px; color: #fff; }
+  .light .nav-icon { color: #000; }
+  .nav-icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+  .toggle { margin-top: auto; padding-top: 14px; color: #a0a0a0 !important; }
+  .collapsed .section-title, .collapsed .service-list button span:last-child, .collapsed .sub-list { display: none; }
+  .collapsed .service-list button { justify-content: center; }
+  .main { position: relative; z-index: 1; display: flex; flex-direction: column; padding: 24px 36px 28px; }
+  .banknote-watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; user-select: none; z-index: 0; overflow: hidden; }
+  .watermark-solid { font-family: Inter, system-ui, sans-serif; font-size: clamp(80px, 16vw, 190px); font-weight: 900; letter-spacing: .12em; color: rgba(255,255,255,.05); text-shadow: 0 0 35px rgba(255,255,255,.22), 0 0 80px rgba(255,255,255,.12); text-transform: uppercase; line-height: 1; transform: translateY(-12px); }
+  .light .watermark-solid { color: rgba(0,0,0,.05); text-shadow: 0 0 35px rgba(0,0,0,.14); }
+  .topbar { position: relative; z-index: 2; display: flex; align-items: center; justify-content: flex-end; min-height: 42px; }
+  .top-actions { display: flex; align-items: center; gap: 8px; }
+  .top-icon { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid transparent; border-radius: 11px; color: #c3c3c3; background: transparent; cursor: pointer; }
+  .top-icon:hover, .top-icon:focus-visible { color: #fff; background: rgba(255,255,255,.1); }
+  .light .top-icon { color: #3d3d3d; }
+  .light .top-icon:hover, .light .top-icon:focus-visible { color: #000; background: rgba(0,0,0,.07); }
+  .top-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
+  .hero-center { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 780px; margin: auto; padding: 20px 20px 70px; }
+  .logo-slot-center { width: 72px; height: 72px; display: grid; place-items: center; border: 1px dashed rgba(255,255,255,.3); border-radius: 50%; color: #888; font-size: 9px; text-align: center; margin-bottom: 20px; }
+  .light .logo-slot-center { border-color: rgba(0,0,0,.25); color: #666; }
+  .welcome-pill { display: inline-flex; align-items: center; padding: 6px 18px; border-radius: 999px; font-size: 13px; font-weight: 500; color: #e5e5e5; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); margin-bottom: 26px; }
+  .light .welcome-badge, .light .welcome-pill { color: #111; background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.12); }
+  .brand-title { font-size: clamp(48px, 8vw, 78px); font-weight: 850; line-height: 1.02; letter-spacing: -.05em; margin: 0 0 20px; color: #fff; }
+  .light .brand-title { color: #000; }
+  .hero-description { font-size: 16px; line-height: 1.6; color: #a4a4a4; max-width: 660px; margin: 0 auto 16px; }
+  .light .hero-description { color: #444; }
+  .hero-description strong { color: #fff; font-weight: 600; }
+  .light .hero-description strong { color: #000; }
+  .quote-pill { display: inline-flex; align-items: center; padding: 6px 16px; border-radius: 999px; font-size: 12px; color: #8f8f8f; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); margin-bottom: 14px; }
+  .light .quote-pill { color: #555; background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.08); }
+  .sub-meta { font-size: 12px; color: #777; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .sub-meta button { color: #bbb; background: none; border: none; font: inherit; cursor: pointer; padding: 0 2px; }
+  .sub-meta button:hover { color: #fff; text-decoration: underline; }
+  .light .sub-meta { color: #666; }
+  .light .sub-meta button { color: #222; }
+  .hero-buttons { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 34px; }
+  .btn-white { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 22px; border-radius: 999px; background: #fff; color: #000; font-size: 13px; font-weight: 600; border: 1px solid #fff; cursor: pointer; }
+  .light .btn-white { background: #000; color: #fff; border-color: #000; }
+  .btn-white:hover { opacity: .9; }
+  .btn-dark { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 22px; border-radius: 999px; background: rgba(255,255,255,.1); color: #fff; font-size: 13px; font-weight: 500; border: 1px solid rgba(255,255,255,.14); cursor: pointer; }
+  .light .btn-dark { background: rgba(0,0,0,.06); color: #000; border-color: rgba(0,0,0,.12); }
+  .btn-dark:hover { background: rgba(255,255,255,.16); }
+  .light .btn-dark:hover { background: rgba(0,0,0,.1); }
+  .quick-chips { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .quick-chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 999px; font-size: 12px; color: #b0b0b0; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); cursor: pointer; }
+  .light .quick-chip { color: #444; background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.09); }
+  .quick-chip:hover { color: #fff; border-color: rgba(255,255,255,.25); }
+  .light .quick-chip:hover { color: #000; border-color: rgba(0,0,0,.2); }
+  .quick-chip svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+  .bottom-links { position: absolute; left: 236px; right: 0; bottom: 13px; display: flex; justify-content: center; flex-wrap: wrap; gap: 3px; }
+  .bottom-links button { min-height: 40px; border: 0; border-radius: 10px; padding: 8px 11px; color: #898989; background: transparent; font: 11px Inter, sans-serif; cursor: pointer; }
+  .bottom-links button:hover, .bottom-links button:focus-visible { color: #fff; background: rgba(255,255,255,.08); }
+  .light .bottom-links button:hover, .light .bottom-links button:focus-visible { color: #000; background: rgba(0,0,0,.07); }
+  button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .light button:focus-visible { outline-color: #000; }
+  @keyframes skeleton-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  @media (max-width: 760px) { .shell { grid-template-columns: 1fr; } .sidebar { flex-direction: row; align-items: center; margin: 10px; padding: 10px 0; } .logo-slot { width: 67px; height: 48px; margin: 0 9px 0 0; } .section-title, .footer, .toggle { display: none; } .service-list { display: flex; flex: 1; overflow: auto; } .service-list button { padding: 7px; } .service-list button span:last-child { display: none; } .service-list button { justify-content: center; } .main { min-height: 510px; padding: 22px 20px 72px; } .hero { padding-top: 62px; } .logo-slot-main { top: 105px; right: -26px; width: 145px; height: 145px; opacity: .8; } .bottom-links { left: 0; bottom: 10px; padding: 0 7px; } }
+</style>
+<h2>FRIDAY Minimal Watermark</h2>
+<p class="subtitle">Solid white shadow watermark with only the word 'FRIDAY' in the background, matching the centered hero, pure monochrome palette, and left services navigation.</p>
+<div class="mockup" data-choice="preconnect-inspired-v2" onclick="toggleSelect(this)">
+  <div class="mockup-header">FRIDAY / monochrome academic companion</div>
+  <div class="mockup-body">
+    <div class="shell" id="friday-shell-v2">
+      <aside class="sidebar" id="friday-sidebar-v2" aria-label="FRIDAY services panel">
+        <div class="logo-slot" aria-label="Logo placement reserved"><span>Logo<br>placement</span></div>
+        <p class="section-title">Services</p>
+        <nav class="service-list" aria-label="FRIDAY Services">
+          <button type="button"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h2M14 14h2M8 17h2M14 17h2"/></svg></span><span>Schedules</span></button>
+          <div class="sub-list">
+            <button type="button">Class</button>
+            <button type="button">Exam</button>
+          </div>
+          <button type="button"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></span><span>Deadlines</span></button>
+          <button type="button"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span>Notices</span></button>
+          <button type="button"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span>Attendance</span></button>
+          <button type="button"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg></span><span>Assistant</span></button>
+        </nav>
+        <p class="section-title">Advising</p>
+        <nav class="service-list" aria-label="FRIDAY Advising">
+          <button type="button"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c0 3 3 5 6 5s6-2 6-5v-5"/><path d="M22 10v6"/></svg></span><span>Degree Progress</span></button>
+          <button type="button"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span><span>Registration Copilot</span></button>
+          <button type="button"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg></span><span>Semester Planner</span></button>
+        </nav>
+        <button class="toggle" type="button" aria-label="Collapse panel" onclick="event.stopPropagation(); document.getElementById('friday-sidebar-v2').classList.toggle('collapsed');"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></span></button>
+      </aside>
+      <main class="main"><header class="topbar"><div class="top-actions"><button class="top-icon" type="button" aria-label="Toggle theme" onclick="event.stopPropagation(); document.getElementById('friday-shell-v2').classList.toggle('light');"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8A9.03 9.03 0 0 0 12 3z"/></svg></button><button class="top-icon" type="button" aria-label="Personal profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c.8-3.4 3.3-5 8-5s7.2 1.6 8 5"/></svg></button></div></header><div class="banknote-watermark" aria-hidden="true"><div class="watermark-solid">FRIDAY</div></div><section class="hero-center"><div class="welcome-pill">Welcome to FRIDAY</div><h1 class="brand-title">FRIDAY</h1><p class="hero-description">Your personalised portal to plan courses, track deadlines, discover free labs, and manage academic services in one place.</p><div class="quote-pill">“Your future self is counting on what you do today. Make it worth the wait.”</div><div class="sub-meta"><span>A calm academic companion for university students</span><span>•</span><button type="button">Support FRIDAY</button><span>•</span><button type="button">Join Community</button></div><div class="hero-buttons"><button class="btn-white" type="button"><span>Open Schedules</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button><button class="btn-dark" type="button"><span>Open Portal</span></button></div><div class="quick-chips"><button class="quick-chip" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Planner</span></button><button class="quick-chip" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg><span>Deadlines</span></button><button class="quick-chip" type="button"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg><span>Notices</span></button><button class="quick-chip" type="button"><svg viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c0 3 3 5 6 5s6-2 6-5v-5"/></svg><span>Degree Tracker</span></button><button class="quick-chip" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h2M14 14h2"/></svg><span>Class Schedule</span></button></div></section></main>
+      <nav class="bottom-links" aria-label="Information and support"><button type="button">About</button><button type="button">Privacy policy</button><button type="button">Terms and conditions</button><button type="button">Support</button></nav>
+    </div>
+  </div>
+</div>
+<p class="subtitle">The sidebar has no container background, the palette is strictly black/white/grayscale, and the logo areas remain reserved for later.</p>

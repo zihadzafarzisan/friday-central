@@ -1,0 +1,58 @@
+<style>
+  .mockup { background: #0b1020; border: 1px solid rgba(255,255,255,.18); box-shadow: 0 24px 80px rgba(31,38,135,.22); }
+  .mockup-body { padding: 0; overflow: hidden; }
+  .portal { min-height: 560px; display: grid; grid-template-columns: 210px 1fr; color: #f8fafc; font-family: Inter, system-ui, sans-serif; background: radial-gradient(40% 40% at 15% 10%, rgba(124,58,237,.42), transparent 60%), radial-gradient(35% 35% at 85% 20%, rgba(37,99,235,.35), transparent 60%), radial-gradient(45% 45% at 50% 95%, rgba(13,148,136,.28), transparent 60%), linear-gradient(135deg,#0b1020,#1a1033); }
+  .rail { display: flex; flex-direction: column; padding: 24px 18px; margin: 16px; margin-right: 0; border: 1px solid rgba(255,255,255,.14); border-radius: 20px; background: rgba(20,24,40,.52); backdrop-filter: blur(16px) saturate(160%); box-shadow: 0 8px 32px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.1); }
+  .rail-logo { width: 74px; height: auto; margin: 0 auto 38px; filter: drop-shadow(0 0 24px rgba(34,211,238,.35)); animation: float 5s ease-in-out infinite; }
+  .rail-nav { display: grid; gap: 6px; }
+  .rail button, .footer button { min-height: 44px; border: 1px solid transparent; border-radius: 12px; color: #cbd5e1; background: transparent; text-align: left; font: inherit; font-size: 13px; padding: 10px 12px; cursor: pointer; }
+  .rail button:first-child { color: #f8fafc; background: rgba(129,140,248,.2); border-color: rgba(129,140,248,.2); }
+  .rail button:hover, .footer button:hover { background: rgba(255,255,255,.1); color: #fff; }
+  .footer { display: grid; gap: 3px; margin-top: auto; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.12); }
+  .footer button { font-size: 12px; color: #94a3b8; }
+  .main { position: relative; padding: 34px 48px 34px; }
+  .topline { display: flex; justify-content: space-between; color: #94a3b8; font-size: 12px; }
+  .orb { position: absolute; width: 250px; height: 250px; right: 68px; top: 72px; border-radius: 50%; background: radial-gradient(circle at 35% 28%, #e0e7ff, #818cf8 20%, #2563eb 54%, transparent 70%); filter: blur(1px); opacity: .75; box-shadow: 0 0 80px rgba(37,99,235,.3); }
+  .hero { position: relative; z-index: 1; padding-top: 92px; max-width: 530px; }
+  .hero h1 { max-width: 520px; font-size: 46px; line-height: 1.08; letter-spacing: -.05em; margin: 0 0 18px; }
+  .hero p { max-width: 360px; color: #cbd5e1; font-size: 14px; line-height: 1.7; margin: 0; }
+  .cta { min-height: 46px; margin-top: 28px; padding: 0 18px; border: 0; border-radius: 12px; color: #fff; background: linear-gradient(135deg,#6366f1,#4f46e5); box-shadow: 0 10px 24px rgba(79,70,229,.3); font: 600 13px Inter, sans-serif; cursor: pointer; }
+  .quote { margin-top: 58px; padding-top: 17px; border-top: 1px solid rgba(255,255,255,.16); color: #cbd5e1; font-size: 14px; line-height: 1.6; max-width: 370px; }
+  .quote span { color: #94a3b8; }
+  button:focus-visible { outline: 2px solid #22d3ee; outline-offset: 3px; }
+  @keyframes float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-7px) rotate(2deg); } }
+  @media (prefers-reduced-motion: reduce) { .rail-logo { animation: none; } }
+  @media (max-width: 700px) { .portal { grid-template-columns: 1fr; } .rail { flex-direction: row; align-items: center; margin: 12px; padding: 12px; } .rail-logo { width: 52px; margin: 0 8px 0 0; } .rail-nav { display: flex; flex: 1; } .rail button { font-size: 12px; padding: 8px; } .footer { display: none; } .main { padding: 25px 22px 36px; } .orb { right: -25px; top: 100px; width: 190px; height: 190px; } .hero { padding-top: 72px; } .hero h1 { font-size: 36px; } }
+</style>
+<h2>Updated direction: focused and accessible</h2>
+<p class="subtitle">The main navigation stays quiet on the left; support and legal links become clear, clickable buttons anchored at the bottom.</p>
+<div class="mockup" data-choice="calm-portal-v2" onclick="toggleSelect(this)">
+  <div class="mockup-header">FRIDAY / landing page direction</div>
+  <div class="mockup-body">
+    <div class="portal">
+      <aside class="rail" aria-label="Landing page navigation">
+        <img class="rail-logo" src="/files/Friday.png" alt="FRIDAY logo" />
+        <nav class="rail-nav" aria-label="Primary navigation">
+          <button type="button">Services</button>
+        </nav>
+        <nav class="footer" aria-label="Information and support">
+          <button type="button">About</button>
+          <button type="button">Privacy policy</button>
+          <button type="button">Terms and conditions</button>
+          <button type="button">Support</button>
+        </nav>
+      </aside>
+      <main class="main">
+        <div class="topline"><span>student life, in one place</span><span>FRIDAY</span></div>
+        <div class="orb"></div>
+        <section class="hero">
+          <h1>Your future self is counting on what you do today.</h1>
+          <p>Make it worth the wait. FRIDAY brings the moving pieces of university life into a calmer view.</p>
+          <button class="cta" type="button">Explore FRIDAY</button>
+          <div class="quote">“Make it worth the wait.”<br><span>— FRIDAY</span></div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+<p class="subtitle">This version follows the design guide’s glass hierarchy, solid primary action, visible focus states, 44px touch targets, readable contrast, and reduced-motion support. FRIDAY Versions has been removed.</p>

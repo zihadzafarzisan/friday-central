@@ -1,0 +1,83 @@
+<style>
+  .mockup { background: #050505; border: 1px solid rgba(255,255,255,.16); box-shadow: 0 24px 80px rgba(0,0,0,.34); }
+  .mockup-body { padding: 0; overflow: hidden; }
+  .portal { min-height: 590px; position: relative; display: grid; grid-template-columns: 250px 1fr; color: #f7f7f7; font-family: Inter, system-ui, sans-serif; background: #070707; overflow: hidden; }
+  .portal.light { color: #111318; background: #eef1f6; }
+  .portal::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(48% 55% at 75% 22%, rgba(255,255,255,.09), transparent 70%), radial-gradient(40% 45% at 18% 92%, rgba(255,255,255,.05), transparent 70%); }
+  .portal.light::before { background: radial-gradient(48% 55% at 75% 22%, rgba(255,255,255,.92), transparent 70%), radial-gradient(40% 45% at 18% 92%, rgba(197,206,222,.4), transparent 70%); }
+  .rail { position: relative; z-index: 1; display: flex; flex-direction: column; margin: 16px; margin-right: 0; padding: 22px 16px; border: 1px solid rgba(255,255,255,.16); border-radius: 20px; background: rgba(17,17,17,.8); backdrop-filter: blur(18px); box-shadow: 0 10px 34px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.07); transition: width .2s ease; }
+  .light .rail { border-color: rgba(15,23,42,.12); background: rgba(255,255,255,.68); box-shadow: 0 10px 34px rgba(71,85,105,.12), inset 0 1px 0 rgba(255,255,255,.8); }
+  .rail.collapsed { width: 64px; padding-left: 10px; padding-right: 10px; }
+  .logo-slot { height: 70px; display: grid; place-items: center; margin-bottom: 30px; border: 1px dashed rgba(255,255,255,.25); border-radius: 16px; color: #9ca3af; font-size: 11px; letter-spacing: .05em; }
+  .light .logo-slot { border-color: rgba(15,23,42,.2); color: #667085; }
+  .logo-slot span { text-align: center; }
+  .section-label { margin: 0 10px 8px; color: #9ca3af; font-size: 11px; }
+  .light .section-label { color: #667085; }
+  .service-list { display: grid; gap: 4px; }
+  .rail button { min-height: 44px; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; border-radius: 12px; padding: 10px; color: #d1d5db; background: transparent; text-align: left; font: inherit; font-size: 13px; cursor: pointer; }
+  .light .rail button { color: #344054; }
+  .rail button:hover, .rail button:focus-visible { color: #fff; background: rgba(255,255,255,.1); }
+  .light .rail button:hover, .light .rail button:focus-visible { color: #111318; background: rgba(15,23,42,.07); }
+  .rail button.active { color: #fff; background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.08); }
+  .light .rail button.active { color: #111318; background: rgba(15,23,42,.08); border-color: rgba(15,23,42,.08); }
+  .icon { width: 24px; height: 24px; display: grid; place-items: center; flex: 0 0 24px; border-radius: 8px; color: #fff; background: rgba(255,255,255,.12); font-size: 12px; }
+  .light .icon { color: #111318; background: rgba(15,23,42,.08); }
+  .collapse { margin-top: auto; justify-content: center !important; border-top: 1px solid rgba(255,255,255,.12) !important; border-radius: 0 !important; padding-top: 16px !important; color: #aeb4be !important; }
+  .collapse span { font-size: 21px; line-height: 1; }
+  .rail.collapsed .section-label, .rail.collapsed .service-list button span:last-child { display: none; }
+  .rail.collapsed .service-list button { justify-content: center; }
+  .main { position: relative; z-index: 1; padding: 34px 52px 34px; }
+  .topline { display: flex; justify-content: space-between; color: #aeb4be; font-size: 12px; }
+  .light .topline { color: #667085; }
+  .hero { max-width: 560px; padding-top: 105px; }
+  .hero h1 { max-width: 540px; margin: 0 0 20px; font-size: clamp(36px, 5vw, 58px); font-weight: 650; line-height: 1.03; letter-spacing: -.06em; }
+  .hero p { max-width: 370px; margin: 0; color: #aeb4be; font-size: 14px; line-height: 1.7; }
+  .light .hero p { color: #475467; }
+  .cta { min-height: 46px; margin-top: 28px; padding: 0 18px; border: 0; border-radius: 12px; color: #070707; background: #fff; box-shadow: 0 10px 24px rgba(0,0,0,.2); font: 600 13px Inter, sans-serif; cursor: pointer; }
+  .light .cta { color: #fff; background: #111318; }
+  .logo-placeholder { position: absolute; top: 86px; right: 12%; width: 180px; height: 180px; display: grid; place-items: center; border: 1px dashed rgba(255,255,255,.23); border-radius: 50%; color: #9ca3af; font-size: 11px; text-align: center; }
+  .light .logo-placeholder { border-color: rgba(15,23,42,.2); color: #667085; }
+  .bottom-links { position: absolute; z-index: 2; left: 250px; right: 0; bottom: 22px; display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 8px; }
+  .bottom-links button { min-height: 44px; padding: 10px 13px; border: 1px solid transparent; border-radius: 10px; color: #aeb4be; background: transparent; font: 12px Inter, sans-serif; cursor: pointer; }
+  .light .bottom-links button { color: #667085; }
+  .bottom-links button:hover, .bottom-links button:focus-visible { color: #fff; background: rgba(255,255,255,.1); }
+  .light .bottom-links button:hover, .light .bottom-links button:focus-visible { color: #111318; background: rgba(15,23,42,.07); }
+  button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .light button:focus-visible { outline-color: #111318; }
+  @media (prefers-reduced-motion: reduce) { .rail { transition: none; } }
+  @media (max-width: 760px) { .portal { grid-template-columns: 1fr; } .rail { flex-direction: row; align-items: center; margin: 12px; padding: 10px; } .logo-slot { width: 72px; height: 52px; margin: 0 10px 0 0; } .section-label, .collapse { display: none; } .service-list { display: flex; flex: 1; overflow: auto; } .rail button { padding: 8px; } .rail button span:last-child { display: none; } .service-list button { justify-content: center; } .main { padding: 26px 22px 92px; } .hero { padding-top: 72px; } .logo-placeholder { top: 112px; right: -18px; width: 150px; height: 150px; } .bottom-links { left: 0; bottom: 16px; padding: 0 12px; } }
+</style>
+<h2>Landing page structure</h2>
+<p class="subtitle">Jet-black and white glass modes, a collapsible services panel, reserved logo spaces, and centered footer actions.</p>
+<div class="mockup" data-choice="landing-v3" onclick="toggleSelect(this)">
+  <div class="mockup-header">FRIDAY / calm portal landing page</div>
+  <div class="mockup-body">
+    <div class="portal" id="portal-preview">
+      <aside class="rail" id="rail-preview" aria-label="Services panel">
+        <div class="logo-slot" aria-label="Logo placement reserved"><span>Logo<br>placement</span></div>
+        <p class="section-label">Services</p>
+        <nav class="service-list" aria-label="FRIDAY services">
+          <button class="active" type="button"><span class="icon">⌂</span><span>Academic</span></button>
+          <button type="button"><span class="icon">◒</span><span>Degree progress</span></button>
+          <button type="button"><span class="icon">◷</span><span>Administrative</span></button>
+          <button type="button"><span class="icon">↗</span><span>Career</span></button>
+          <button type="button"><span class="icon">✦</span><span>Personal</span></button>
+        </nav>
+        <button class="collapse" type="button" aria-label="Collapse services panel" onclick="event.stopPropagation(); document.getElementById('rail-preview').classList.toggle('collapsed');"><span>‹</span><span>Collapse panel</span></button>
+      </aside>
+      <main class="main">
+        <div class="topline"><span>student life, in one place</span><span>FRIDAY</span></div>
+        <div class="logo-placeholder" aria-label="Animated logo placement reserved">Animated logo<br>placement</div>
+        <section class="hero">
+          <h1>Your future self is counting on what you do today.</h1>
+          <p>Make it worth the wait. FRIDAY brings the moving pieces of university life into a calmer view.</p>
+          <button class="cta" type="button">Explore FRIDAY</button>
+        </section>
+      </main>
+      <nav class="bottom-links" aria-label="Information and support">
+        <button type="button">About</button><button type="button">Privacy policy</button><button type="button">Terms and conditions</button><button type="button">Support</button>
+      </nav>
+    </div>
+  </div>
+</div>
+<p class="subtitle">The panel arrow is interactive in this preview. The logo image and animation remain intentionally reserved for a later pass.</p>

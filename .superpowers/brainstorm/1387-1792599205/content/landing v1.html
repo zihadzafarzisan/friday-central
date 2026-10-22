@@ -1,0 +1,98 @@
+<style>
+  .mockup { background: #000; border: 1px solid rgba(255,255,255,.18); box-shadow: 0 24px 80px rgba(0,0,0,.3); }
+  .mockup-body { padding: 0; overflow: hidden; }
+  .shell { min-height: 620px; position: relative; display: grid; grid-template-columns: 236px 1fr; overflow: hidden; color: #f7faff; background: #000; font-family: Inter, system-ui, sans-serif; transition: background .2s ease, color .2s ease; }
+  .shell.light { color: #172033; background: #f5faff; }
+  .shell::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(45% 55% at 78% 18%, rgba(30,107,227,.18), transparent 72%), radial-gradient(36% 45% at 15% 92%, rgba(34,181,115,.10), transparent 72%); }
+  .shell.light::before { background: radial-gradient(45% 55% at 78% 18%, rgba(30,107,227,.12), transparent 72%), radial-gradient(36% 45% at 15% 92%, rgba(34,181,115,.12), transparent 72%); }
+  .sidebar { position: relative; z-index: 1; display: flex; flex-direction: column; margin: 14px; padding: 15px; border-radius: 21px; background: rgba(13,16,22,.92); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 8px 28px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.06); transition: width .2s ease; }
+  .light .sidebar { background: rgba(255,255,255,.78); border-color: rgba(17,32,55,.1); box-shadow: 0 8px 28px rgba(30,107,227,.08), inset 0 1px 0 #fff; }
+  .sidebar.collapsed { width: 58px; }
+  .logo-slot { height: 54px; margin-bottom: 25px; display: grid; place-items: center; border: 1px dashed rgba(255,255,255,.24); border-radius: 16px; color: #aab4c4; font-size: 10px; text-align: center; }
+  .light .logo-slot { border-color: rgba(17,32,55,.18); color: #667085; }
+  .section-title { margin: 0 8px 8px; color: #8995a8; font-size: 10px; font-weight: 600; }
+  .service-list { display: grid; gap: 5px; }
+  .service-list button, .footer button, .toggle, .theme-toggle { min-height: 44px; display: flex; align-items: center; gap: 9px; border: 1px solid transparent; border-radius: 12px; padding: 9px 10px; color: #bbc5d4; background: transparent; text-align: left; font: 500 12px Inter, sans-serif; cursor: pointer; }
+  .light .service-list button, .light .footer button { color: #475467; }
+  .service-list button:hover, .service-list button:focus-visible, .footer button:hover, .footer button:focus-visible, .theme-toggle:hover, .theme-toggle:focus-visible { color: #fff; background: rgba(255,255,255,.08); }
+  .light .service-list button:hover, .light .service-list button:focus-visible, .light .footer button:hover, .light .footer button:focus-visible, .light .theme-toggle:hover, .light .theme-toggle:focus-visible { color: #172033; background: rgba(17,32,55,.06); }
+  .service-list button.active { color: #fff; border-color: rgba(30,107,227,.28); background: linear-gradient(100deg, rgba(30,107,227,.3), rgba(30,107,227,.08)); }
+  .light .service-list button.active { color: #17336a; background: rgba(30,107,227,.1); }
+  .service-icon { width: 25px; height: 25px; display: grid; place-items: center; flex: 0 0 25px; border-radius: 8px; color: #fff; background: #1e6be3; font-size: 12px; }
+  .service-list button:nth-child(2) .service-icon { background: #22b573; }
+  .service-list button:nth-child(3) .service-icon { background: #e0a11a; }
+  .service-list button:nth-child(4) .service-icon { background: #d2529c; }
+  .service-list button:nth-child(5) .service-icon { background: #7f68d8; }
+  .footer { display: grid; gap: 2px; margin-top: auto; padding-top: 11px; border-top: 1px solid rgba(255,255,255,.1); }
+  .light .footer { border-color: rgba(17,32,55,.1); }
+  .footer button { min-height: 38px; font-size: 11px; }
+  .toggle { margin-top: 7px; justify-content: center; border-top: 1px solid rgba(255,255,255,.1); border-radius: 0; color: #98a4b6; }
+  .light .toggle { border-color: rgba(17,32,55,.1); }
+  .collapsed .section-title, .collapsed .service-list button span:last-child, .collapsed .footer, .collapsed .theme-toggle span:last-child { display: none; }
+  .collapsed .service-list button, .collapsed .theme-toggle { justify-content: center; }
+  .main { position: relative; z-index: 1; display: flex; flex-direction: column; padding: 24px 36px 28px; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 42px; }
+  .eyebrow { color: #8995a8; font-size: 11px; }
+  .top-actions { display: flex; align-items: center; gap: 8px; }
+  .theme-toggle { min-width: 42px; justify-content: center; padding: 8px; color: #bbc5d4; }
+  .hero { width: min(100%, 610px); margin: auto 0; padding: 54px 0 60px; }
+  .hero-kicker { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 16px; color: #8cc4ff; font-size: 11px; font-weight: 600; }
+  .hero-kicker i { width: 7px; height: 7px; border-radius: 50%; background: #22b573; box-shadow: 0 0 12px rgba(34,181,115,.75); }
+  .hero h1 { max-width: 600px; margin: 0 0 18px; font-size: clamp(34px, 5vw, 58px); line-height: 1.03; letter-spacing: -.06em; font-weight: 650; }
+  .hero p { max-width: 380px; margin: 0; color: #9aa6b7; font-size: 13px; line-height: 1.65; }
+  .light .hero p { color: #667085; }
+  .actions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 25px; }
+  .primary, .secondary { min-height: 44px; border-radius: 12px; padding: 10px 16px; font: 600 12px Inter, sans-serif; cursor: pointer; }
+  .primary { color: #fff; border: 1px solid #1e6be3; background: #1e6be3; box-shadow: 0 8px 20px rgba(30,107,227,.22); }
+  .secondary { color: #b7c8e4; border: 1px solid rgba(140,196,255,.25); background: rgba(255,255,255,.04); }
+  .light .secondary { color: #1e6be3; border-color: rgba(30,107,227,.25); background: rgba(255,255,255,.65); }
+  .logo-slot-main { position: absolute; top: 110px; right: 8%; width: 170px; height: 170px; display: grid; place-items: center; border: 1px dashed rgba(140,196,255,.32); border-radius: 50%; color: #8fa1bb; font-size: 10px; text-align: center; }
+  .light .logo-slot-main { border-color: rgba(30,107,227,.24); color: #667085; }
+  .quote { margin-top: 44px; padding-top: 13px; border-top: 1px solid rgba(255,255,255,.12); color: #ced7e3; font-family: Georgia, serif; font-size: 13px; line-height: 1.55; }
+  .light .quote { border-color: rgba(17,32,55,.1); color: #344054; }
+  .bottom-links { position: absolute; left: 236px; right: 0; bottom: 13px; display: flex; justify-content: center; flex-wrap: wrap; gap: 3px; }
+  .bottom-links button { min-height: 40px; border: 0; border-radius: 10px; padding: 8px 11px; color: #8995a8; background: transparent; font: 11px Inter, sans-serif; cursor: pointer; }
+  .bottom-links button:hover, .bottom-links button:focus-visible { color: #fff; background: rgba(255,255,255,.08); }
+  .light .bottom-links button:hover, .light .bottom-links button:focus-visible { color: #172033; background: rgba(17,32,55,.06); }
+  button:focus-visible { outline: 2px solid #8cc4ff; outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  @media (max-width: 760px) { .shell { grid-template-columns: 1fr; } .sidebar { flex-direction: row; align-items: center; margin: 10px; padding: 10px; } .logo-slot { width: 67px; height: 48px; margin: 0 9px 0 0; } .section-title, .footer, .toggle { display: none; } .service-list { display: flex; flex: 1; overflow: auto; } .service-list button { padding: 7px; } .service-list button span:last-child { display: none; } .service-list button { justify-content: center; } .main { min-height: 510px; padding: 22px 20px 72px; } .hero { padding-top: 62px; } .logo-slot-main { top: 105px; right: -26px; width: 145px; height: 145px; opacity: .8; } .bottom-links { left: 0; bottom: 10px; padding: 0 7px; } }
+</style>
+<h2>FRIDAY, with PreConnect’s visual language</h2>
+<p class="subtitle">A compact, card-first academic companion: black/white surfaces, blue and green utility accents, compact labels, rounded controls, and calm information density.</p>
+<div class="mockup" data-choice="preconnect-inspired" onclick="toggleSelect(this)">
+  <div class="mockup-header">FRIDAY / inspired by the supplied PreConnect frontend</div>
+  <div class="mockup-body">
+    <div class="shell" id="friday-shell">
+      <aside class="sidebar" id="friday-sidebar" aria-label="FRIDAY services panel">
+        <div class="logo-slot" aria-label="Logo placement reserved"><span>Logo<br>placement</span></div>
+        <p class="section-title">SERVICES</p>
+        <nav class="service-list" aria-label="FRIDAY services">
+          <button class="active" type="button"><span class="service-icon">⌂</span><span>Academic</span></button>
+          <button type="button"><span class="service-icon">◒</span><span>Degree progress</span></button>
+          <button type="button"><span class="service-icon">◷</span><span>Administrative</span></button>
+          <button type="button"><span class="service-icon">↗</span><span>Career</span></button>
+          <button type="button"><span class="service-icon">✦</span><span>Personal</span></button>
+        </nav>
+        <div class="footer">
+          <button type="button">About</button><button type="button">Privacy policy</button><button type="button">Terms and conditions</button><button type="button">Support</button>
+        </div>
+        <button class="theme-toggle" type="button" aria-label="Toggle light and dark mode" onclick="event.stopPropagation(); document.getElementById('friday-shell').classList.toggle('light');"><span>◐</span><span>Theme</span></button>
+        <button class="toggle" type="button" aria-label="Collapse services panel" onclick="event.stopPropagation(); document.getElementById('friday-sidebar').classList.toggle('collapsed');"><span>‹</span><span>Collapse panel</span></button>
+      </aside>
+      <main class="main">
+        <header class="topbar"><span class="eyebrow">FRIDAY / STUDENT OS</span><div class="top-actions"><span class="eyebrow">calm by design</span></div></header>
+        <div class="logo-slot-main" aria-label="Animated logo placement reserved">Animated logo<br>placement</div>
+        <section class="hero">
+          <div class="hero-kicker"><i></i>One place for university life</div>
+          <h1>Your future self is counting on what you do today.</h1>
+          <p>Make it worth the wait. Keep your schedule, deadlines, notices, and degree progress close at hand.</p>
+          <div class="actions"><button class="primary" type="button">Explore FRIDAY</button><button class="secondary" type="button">See how it works</button></div>
+          <div class="quote">“Make it worth the wait.”<br>— FRIDAY</div>
+        </section>
+      </main>
+      <nav class="bottom-links" aria-label="Information and support"><button type="button">About</button><button type="button">Privacy policy</button><button type="button">Terms and conditions</button><button type="button">Support</button></nav>
+    </div>
+  </div>
+</div>
+<p class="subtitle">The visual influence is limited to layout language and design conventions observed in the supplied repository; FRIDAY keeps its own copy, service model, and reserved logo treatment.</p>
