@@ -16,12 +16,12 @@
 
 | Field | Value |
 |---|---|
-| Last task completed | Made schedule views live-refreshing and alphabetically ordered |
+| Last task completed | Made the FRIDAY watermark global across all portal pages |
 | Completed date | October 23, 2026 |
 | Current next task | Scaffold the application and move schedule ingestion behind a validated server-side service |
 | Current owner | Project team |
 | Status | In progress |
-| Notes | The prototype removes semester filtering and fetches the public Connect dataset with cache bypass whenever Class or Exam is opened; production should add server-side validation, caching, attribution, and scheduled refresh. |
+| Notes | The watermark is now one fixed portal-shell layer, so current and future in-portal views inherit the same stationary treatment automatically. |
 
 ### Task update format
 
