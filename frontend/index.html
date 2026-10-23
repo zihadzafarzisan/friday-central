@@ -637,6 +637,38 @@
         padding: 0 10px;
       }
     }
+
+    /* Schedule workspace */
+    .schedule-panel {
+      position: fixed;
+      z-index: 20;
+      inset: 0 0 0 248px;
+      padding: 34px 42px;
+      background: var(--bg);
+      color: var(--text);
+      overflow-y: auto;
+      transform: translateX(102%);
+      transition: transform 0.28s ease;
+    }
+
+    .schedule-panel.open { transform: translateX(0); }
+    .schedule-panel__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; max-width: 1120px; margin: 0 auto 26px; }
+    .schedule-panel__eyebrow { color: var(--text-muted); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+    .schedule-panel h2 { font-size: clamp(28px, 4vw, 48px); letter-spacing: -.05em; }
+    .schedule-panel__close { border: 1px solid var(--border); border-radius: 50%; width: 42px; height: 42px; background: var(--chip-bg); color: var(--text); cursor: pointer; font-size: 22px; }
+    .schedule-toolbar { max-width: 1120px; margin: 0 auto 22px; display: grid; grid-template-columns: minmax(220px, 1fr) 180px 180px; gap: 10px; }
+    .schedule-toolbar input, .schedule-toolbar select { min-height: 44px; border: 1px solid var(--border); border-radius: 10px; padding: 0 13px; background: var(--chip-bg); color: var(--text); font: inherit; }
+    .schedule-status { max-width: 1120px; margin: 0 auto 12px; color: var(--text-muted); font-size: 13px; }
+    .schedule-table-wrap { max-width: 1120px; margin: 0 auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; }
+    .schedule-table { width: 100%; border-collapse: collapse; min-width: 760px; font-size: 13px; }
+    .schedule-table th { color: var(--text-muted); font-size: 11px; font-weight: 600; text-align: left; letter-spacing: .06em; text-transform: uppercase; background: var(--chip-bg); }
+    .schedule-table th, .schedule-table td { padding: 14px 15px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+    .schedule-table tr:last-child td { border-bottom: 0; }
+    .schedule-table strong { display: block; font-size: 14px; margin-bottom: 3px; }
+    .schedule-table small { color: var(--text-muted); }
+    .schedule-badge { display: inline-block; border: 1px solid var(--border); border-radius: 999px; padding: 3px 8px; font-size: 11px; }
+    @media (max-width: 760px) { .schedule-panel { inset: 0; padding: 22px 16px 80px; } .schedule-toolbar { grid-template-columns: 1fr; } .schedule-panel__header { margin-bottom: 18px; } }
+    @media (prefers-reduced-motion: reduce) { .schedule-panel { transition: none; } }
   </style>
 </head>
 <body>
@@ -817,9 +849,73 @@
         <button type="button">Support</button>
       </nav>
     </main>
+
+    <section class="schedule-panel" id="schedulePanel" aria-labelledby="scheduleTitle" aria-hidden="true">
+      <div class="schedule-panel__header">
+        <div><p class="schedule-panel__eyebrow" id="scheduleEyebrow">Live from Connect</p><h2 id="scheduleTitle">Class schedule</h2></div>
+        <button class="schedule-panel__close" id="scheduleClose" type="button" aria-label="Close schedule">×</button>
+      </div>
+      <div class="schedule-toolbar">
+        <input id="scheduleSearch" type="search" placeholder="Search course or name" aria-label="Search course or name" />
+        <input id="facultySearch" type="search" placeholder="Faculty initials" aria-label="Filter by faculty initials" />
+      </div>
+      <p class="schedule-status" id="scheduleStatus">Loading public schedule data…</p>
+      <div class="schedule-table-wrap">
+        <table class="schedule-table"><thead id="scheduleHead"></thead><tbody id="scheduleBody"></tbody></table>
+      </div>
+    </section>
   </div>
 
   <script>
+    const SCHEDULE_DATA_URL = 'https://usis-cdn.eniamza.com/connect-migrate.json';
+    const schedulePanel = document.getElementById('schedulePanel');
+    const scheduleTitle = document.getElementById('scheduleTitle');
+    const scheduleEyebrow = document.getElementById('scheduleEyebrow');
+    const scheduleHead = document.getElementById('scheduleHead');
+    const scheduleBody = document.getElementById('scheduleBody');
+    const scheduleStatus = document.getElementById('scheduleStatus');
+    const scheduleSearch = document.getElementById('scheduleSearch');
+    const facultySearch = document.getElementById('facultySearch');
+    let scheduleRows = [];
+    let scheduleLoadedAt = null;
+    let scheduleMode = 'class';
+
+    const formatTime = value => value ? new Date(`1970-01-01T${value}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '—';
+    const formatDate = value => value ? new Date(`${value}T00:00:00`).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    const classMeetings = row => (row.sectionSchedule?.classSchedules || []).map(item => `${item.day.slice(0, 3)} ${formatTime(item.startTime)}–${formatTime(item.endTime)}`).join(' · ') || 'Schedule pending';
+    const examMeetings = row => { const exam = row.sectionSchedule; return [exam?.midExamDate ? `Midterm · ${formatDate(exam.midExamDate)} · ${formatTime(exam.midExamStartTime)}–${formatTime(exam.midExamEndTime)}` : '', exam?.finalExamDate ? `Final · ${formatDate(exam.finalExamDate)} · ${formatTime(exam.finalExamStartTime)}–${formatTime(exam.finalExamEndTime)}` : ''].filter(Boolean).join('<br>') || 'Exam date pending'; };
+
+    function renderSchedule() {
+      const query = scheduleSearch.value.trim().toLowerCase();
+      const faculty = facultySearch.value.trim().toLowerCase();
+      const rows = scheduleRows
+        .filter(row => (!query || `${row.courseCode} ${row.courseName}`.toLowerCase().includes(query)) && (!faculty || `${row.faculties || ''} ${row.labFaculties || ''}`.toLowerCase().includes(faculty)))
+        .sort((a, b) => `${a.courseCode || ''} ${a.courseName || ''} ${a.sectionName || ''}`.localeCompare(`${b.courseCode || ''} ${b.courseName || ''} ${b.sectionName || ''}`, undefined, { numeric: true, sensitivity: 'base' }));
+      const updatedLabel = scheduleLoadedAt ? ` · updated ${scheduleLoadedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : '';
+      scheduleStatus.textContent = `${rows.length.toLocaleString()} ${scheduleMode === 'class' ? 'class sections' : 'exam sections'} · public data from Connect${updatedLabel}`;
+      scheduleHead.innerHTML = scheduleMode === 'class' ? '<tr><th>Course</th><th>Faculty</th><th>When</th><th>Room</th><th>Seats</th></tr>' : '<tr><th>Course</th><th>Faculty</th><th>Exams</th><th>Section</th></tr>';
+      scheduleBody.innerHTML = rows.slice(0, 250).map(row => scheduleMode === 'class' ? `<tr><td><strong>${row.courseCode} · ${row.sectionName || '—'}</strong><small>${row.courseName || 'Course name unavailable'}</small></td><td><span class="schedule-badge">${row.faculties || 'TBA'}</span></td><td>${classMeetings(row)}${row.labSchedules?.length ? `<br><small>Lab: ${row.labSchedules.map(item => `${item.day.slice(0,3)} ${formatTime(item.startTime)}–${formatTime(item.endTime)}`).join(' · ')}</small>` : ''}</td><td>${row.roomName || 'TBA'}</td><td>${row.capacity != null ? `${row.consumedSeat || 0}/${row.capacity}` : '—'}</td></tr>` : `<tr><td><strong>${row.courseCode} · ${row.sectionName || '—'}</strong><small>${row.courseName || 'Course name unavailable'}</small></td><td><span class="schedule-badge">${row.faculties || 'TBA'}</span></td><td>${examMeetings(row)}</td><td>${row.sectionType || '—'}</td></tr>`).join('') || '<tr><td colspan="5">No matching schedule records.</td></tr>';
+    }
+
+    async function openSchedule(mode) {
+      scheduleMode = mode;
+      scheduleTitle.textContent = mode === 'class' ? 'Class schedule' : 'Exam schedule';
+      scheduleEyebrow.textContent = mode === 'class' ? 'Classes, labs, and faculty initials' : 'Midterms and finals from Connect';
+      schedulePanel.classList.add('open'); schedulePanel.setAttribute('aria-hidden', 'false');
+      try {
+        const response = await fetch(`${SCHEDULE_DATA_URL}?refresh=${Date.now()}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error('Schedule source unavailable');
+        const payload = await response.json();
+        scheduleRows = Array.isArray(payload.courses) ? payload.courses : [];
+        scheduleLoadedAt = new Date();
+        renderSchedule();
+      } catch (error) { scheduleStatus.textContent = 'Schedule data could not be loaded. Check your connection and try again.'; }
+    }
+
+    document.querySelectorAll('.sub-button').forEach(button => button.addEventListener('click', () => openSchedule(button.textContent.trim().toLowerCase())));
+    document.getElementById('scheduleClose').addEventListener('click', () => { schedulePanel.classList.remove('open'); schedulePanel.setAttribute('aria-hidden', 'true'); });
+    [scheduleSearch, facultySearch].forEach(control => control.addEventListener('input', renderSchedule));
+
     // Sidebar collapse toggle
     const sidebar = document.getElementById('portalSidebar');
     const toggleBtn = document.getElementById('sidebarToggle');

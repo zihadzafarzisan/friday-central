@@ -16,12 +16,12 @@
 
 | Field | Value |
 |---|---|
-| Last task completed | Reviewed all current project documents and created this build plan |
-| Completed date | October 21, 2026 |
-| Current next task | Confirm unresolved product and technology decisions, then scaffold the monorepo |
+| Last task completed | Made schedule views live-refreshing and alphabetically ordered |
+| Completed date | October 23, 2026 |
+| Current next task | Scaffold the application and move schedule ingestion behind a validated server-side service |
 | Current owner | Project team |
-| Status | Ready to start |
-| Notes | The AI provider and final database/auth provider are not yet locked. |
+| Status | In progress |
+| Notes | The prototype removes semester filtering and fetches the public Connect dataset with cache bypass whenever Class or Exam is opened; production should add server-side validation, caching, attribution, and scheduled refresh. |
 
 ### Task update format
 
@@ -137,7 +137,7 @@ Dates are initial working targets beginning October 21, 2026. Adjust them in thi
 
 ### P0-T03: Scaffold the monorepo and web application
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** October 23–24, 2026
 **Dependencies:** P0-T02
 
@@ -620,6 +620,7 @@ The MVP can be released to a pilot only when all of the following are true:
 |---|---|---|---|
 | October 21, 2026 | Read `prd.md`, `techstack.md`, `app-flow.md`, `database.md`, and `design-guide.md` | Requirements, routes, data model, stack, design, security, and release phases mapped | Confirm decisions in P0-T01 and P0-T02 |
 | October 21, 2026 | Created `buildplan.md` | Full project plan and tracking structure created | Start P0-T01 |
+| October 23, 2026 | Schedule prototype integration | Added Class and Exam views with course/faculty/semester filters backed by the public Connect JSON dataset | Scaffold the server-side application integration |
 
 ---
 
@@ -628,6 +629,7 @@ The MVP can be released to a pilot only when all of the following are true:
 | Date | Change | Reason |
 |---|---|---|
 | October 21, 2026 | Initial build plan created | Consolidated the current PRD, tech stack, app flow, database, and design documents |
+| October 23, 2026 | Added public schedule data prototype | Class and exam navigation now display Connect course, timetable, faculty, room, seat, and exam data |
 
 ---
 
