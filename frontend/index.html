@@ -13,7 +13,7 @@
       --bg: #000000;
       --text: #ffffff;
       --text-muted: #8e8e8e;
-      --text-subtle: #5f5f5f;
+      --text-subtle: #929292;
       --border: rgba(255, 255, 255, 0.14);
       --border-subtle: rgba(255, 255, 255, 0.08);
       --surface-hover: rgba(255, 255, 255, 0.08);
@@ -35,7 +35,7 @@
       --bg: #ffffff;
       --text: #000000;
       --text-muted: #555555;
-      --text-subtle: #999999;
+      --text-subtle: #646464;
       --border: rgba(0, 0, 0, 0.14);
       --border-subtle: rgba(0, 0, 0, 0.08);
       --surface-hover: rgba(0, 0, 0, 0.06);
@@ -753,14 +753,141 @@
     @media (max-width: 760px) { .deadline-panel, .schedule-panel { inset: 0; padding: 22px 16px 80px; } .schedule-toolbar { grid-template-columns: 1fr; } .deadline-panel__header, .schedule-panel__header { margin-bottom: 18px; } .deadline-card { grid-template-columns: 1fr; gap: 8px; } }
     @media (prefers-reduced-motion: reduce) { .deadline-panel, .schedule-panel { transition: none; } }
   </style>
+  <style>
+    /* Shared prototype pages. The portal watermark stays on the shell. */
+    [hidden] { display: none !important; }
+    :root { color-scheme: dark; --panel-fill: rgba(16, 16, 16, .94); --warning: #fbbf24; --positive: #86efac; }
+    [data-theme="light"] { color-scheme: light; --panel-fill: rgba(255, 255, 255, .94); --warning: #854d0e; --positive: #166534; }
+    .skip-link { position: fixed; top: 8px; left: 12px; z-index: 300; transform: translateY(-160%); padding: 12px; background: var(--btn-white-bg); color: var(--btn-white-text); border-radius: 8px; }
+    .skip-link:focus { transform: none; }
+    .topbar { position: fixed; z-index: 110; }
+    .logo-slot { border: 0; cursor: pointer; background: transparent; }
+    .icon-btn, .nav-button, .sub-button, .collapse-toggle, .quick-chip, .bottom-links button, .sub-meta button { min-height: 44px; }
+    .icon-btn { width: 44px; }
+    .nav-button[aria-current="page"], .sub-button[aria-current="page"] { color: var(--text); text-decoration: underline; text-underline-offset: 5px; }
+    .main-content { padding-inline: 248px 32px; }
+    .hero-container { max-width: 820px; }
+    .sidebar { overflow-y: auto; scrollbar-width: thin; }
+    .sidebar.collapsed:focus-within { width: 210px; }
+    .sidebar.collapsed:focus-within .sidebar-logo-img { max-height: 42px; max-width: 145px; }
+    .sidebar.collapsed:focus-within .section-title, .sidebar.collapsed:focus-within .nav-button span:last-child { display: initial; }
+    .sidebar.collapsed:focus-within .nav-button { justify-content: flex-start; padding: 4px 7px; }
+    .sidebar.collapsed:focus-within .sub-list.open { display: grid; }
+    .sidebar.collapsed:hover .sub-list:not(.open) { display: none; }
+    .portal-shell:has(.sidebar.collapsed) .main-content { padding-left: 92px; }
+    .page-panel, .deadline-panel, .schedule-panel {
+      position: fixed; inset: 0 0 0 248px; z-index: 20; overflow-y: auto;
+      padding: 88px 38px 50px; background: transparent; color: var(--text); transform: none;
+      scrollbar-gutter: stable; animation: page-enter .2s ease both;
+    }
+    .portal-shell:has(.sidebar.collapsed) .page-panel,
+    .portal-shell:has(.sidebar.collapsed) .deadline-panel,
+    .portal-shell:has(.sidebar.collapsed) .schedule-panel { left: 92px; }
+    .page-panel__header, .deadline-panel__header, .schedule-panel__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; max-width: 1050px; margin: 0 auto 26px; }
+    .page-panel__eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .page-panel h2, .deadline-panel h2, .schedule-panel h2 { font-size: clamp(28px, 4vw, 46px); letter-spacing: -.05em; line-height: 1.15; }
+    .page-description { color: var(--text-muted); line-height: 1.65; font-size: 14px; margin-top: 12px; max-width: 680px; }
+    .page-panel__close, .deadline-panel__close, .schedule-panel__close { flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: var(--panel-fill); color: var(--text); cursor: pointer; font-size: 23px; }
+    .page-content, .deadline-list, .schedule-toolbar, .schedule-status, .schedule-table-wrap { max-width: 1050px; margin-inline: auto; }
+    .page-content { display: grid; gap: 20px; }
+    .demo-banner, .state-card, .demo-card, .metric, .deadline-card { padding: 22px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel-fill); }
+    .demo-banner { font-size: 13px; color: var(--text-muted); line-height: 1.7; padding: 14px 18px; }
+    .demo-banner a { color: var(--text); }
+    .demo-list, .stack { display: grid; gap: 14px; }
+    .demo-card h3, .state-card h3 { font-size: 17px; line-height: 1.4; margin-bottom: 8px; }
+    .demo-card p, .state-card p, .muted { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .metric strong { display: block; font-size: 30px; letter-spacing: -.05em; margin-bottom: 6px; }
+    .metric span { font-size: 13px; color: var(--text-muted); }
+    .split-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 20px; align-items: start; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .status-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--panel-fill); color: var(--text-muted); }
+    .warning { color: var(--warning); }
+    .positive { color: var(--positive); }
+    .page-content button, .page-content input, .page-content select, .page-content textarea, .deadline-panel input, .deadline-panel select { font: inherit; }
+    .action-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel-fill); color: var(--text); cursor: pointer; text-decoration: none; font-size: 13px; }
+    .action-button.primary { background: var(--btn-white-bg); color: var(--btn-white-text); border-color: var(--btn-white-bg); font-weight: 600; }
+    .action-button:hover { opacity: .8; }
+    .action-button:disabled { opacity: .5; cursor: wait; }
+    .field { display: grid; gap: 8px; min-width: 0; }
+    .field label, .field-label { font-size: 13px; font-weight: 500; }
+    .field input, .field select, .field textarea, .toolbar input, .toolbar select { width: 100%; min-width: 0; min-height: 44px; border-radius: 10px; border: 1px solid var(--border); padding: 11px 12px; background: var(--panel-fill); color: var(--text); font: inherit; }
+    .field-error { min-height: 18px; color: var(--warning); font-size: 12px; }
+    [aria-invalid="true"] { border-color: var(--warning) !important; }
+    .check-label { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; cursor: pointer; }
+    .check-label input { width: 18px; height: 18px; accent-color: var(--text); }
+    .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 12px; }
+    .toolbar label { display: grid; gap: 8px; font-size: 13px; }
+    .toolbar .check-label { display: flex; align-self: end; }
+    .toolbar .check-label input { width: 18px; min-height: 18px; flex: 0 0 18px; padding: 0; }
+    .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-chips button[aria-pressed="true"] { background: var(--btn-white-bg); color: var(--btn-white-text); }
+    .progress-track { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; margin-top: 14px; }
+    .progress-track span { display: block; height: 100%; background: var(--text); border-radius: inherit; }
+    .course-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; padding-block: 16px; border-bottom: 1px solid var(--border); }
+    .course-row:last-child { border-bottom: 0; }
+    .course-row strong { display: block; margin-bottom: 4px; }
+    .course-row small { color: var(--text-muted); line-height: 1.6; }
+    .login-card { max-width: 460px; }
+    .form-notice { font-size: 13px; line-height: 1.7; color: var(--text-muted); }
+    .schedule-toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; }
+    .schedule-toolbar label { display: grid; gap: 8px; font-size: 13px; }
+    .schedule-table-wrap { background: var(--panel-fill); }
+    .schedule-table th { background: transparent; }
+    .schedule-status { line-height: 1.7; }
+    .deadline-heading { font-size: 15px; margin-top: 8px; }
+    .deadline-card p { margin-top: 6px; }
+    .deadline-card time { white-space: normal; }
+    .deadline-card.is-done h3 { text-decoration: line-through; color: var(--text-muted); }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); max-width: min(520px, calc(100vw - 32px)); padding: 14px 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--btn-white-bg); color: var(--btn-white-text); font-size: 13px; line-height: 1.5; z-index: 200; box-shadow: 0 8px 28px #0003; }
+    input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex="-1"]:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @keyframes page-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @media (max-width: 1050px) { .split-grid { grid-template-columns: 1fr; } .page-panel, .deadline-panel, .schedule-panel { padding-inline: 24px; } }
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; inset: auto 0 0; width: 100%; height: 70px; padding: 8px; display: flex; flex-direction: row; gap: 6px; background: var(--bg) !important; border-top: 1px solid var(--border); overflow-x: auto; overflow-y: hidden; }
+      .sidebar .logo-slot, .sidebar .section-title, .sidebar .collapse-toggle { display: none; }
+      .sidebar .nav-list { display: flex; flex: 0 0 auto; gap: 4px; }
+      .sidebar .nav-button, .sidebar.collapsed .nav-button { width: auto; min-width: 56px; height: 50px; display: flex; flex-direction: column; gap: 3px; padding: 5px 7px; justify-content: center; font-size: 10px; }
+      .sidebar .nav-button span:last-child, .sidebar.collapsed .nav-button span:last-child { display: block; white-space: nowrap; }
+      .sidebar .sub-list.open, .sidebar.collapsed .sub-list.open { display: flex; flex: 0 0 auto; margin: 0; padding: 0; align-items: center; }
+      .sidebar .sub-button { min-width: 52px; font-size: 12px; }
+      .sidebar.collapsed:focus-within { width: 100%; }
+      .topbar { top: 12px; right: 16px; }
+      .main-content, .portal-shell:has(.sidebar.collapsed) .main-content { padding: 84px 18px 140px; }
+      .hero-description { font-size: 14px; }
+      .bottom-links { position: static; margin-top: 30px; padding: 0; gap: 8px; }
+      .page-panel, .deadline-panel, .schedule-panel,
+      .portal-shell:has(.sidebar.collapsed) .page-panel,
+      .portal-shell:has(.sidebar.collapsed) .deadline-panel,
+      .portal-shell:has(.sidebar.collapsed) .schedule-panel { inset: 0 0 70px; padding: 80px 16px 30px; }
+      .page-panel__header, .deadline-panel__header, .schedule-panel__header { gap: 10px; }
+      .metric-grid { grid-template-columns: 1fr; }
+      .metric { display: flex; align-items: center; gap: 16px; }
+      .metric strong { margin: 0; }
+      .toolbar, .schedule-toolbar { grid-template-columns: 1fr; }
+      .demo-card, .state-card, .metric, .deadline-card { padding: 18px; }
+      .deadline-card, .course-row { grid-template-columns: 1fr; }
+      .toast { bottom: 86px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .page-panel, .deadline-panel, .schedule-panel { animation: none; } }
+    @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+      :root { --panel-fill: #101010; --border: #777; --sidebar-glass: #292929; }
+      [data-theme="light"] { --panel-fill: #fff; --border: #666; --sidebar-glass: #eee; }
+      .portal-shell::before { display: none; }
+      button { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+    }
+  </style>
 </head>
 <body>
+  <a class="skip-link" href="#portalMain">Skip to content</a>
   <div class="portal-shell">
     <!-- Left Navigation Panel (Transparent Background) -->
     <aside class="sidebar" id="portalSidebar" aria-label="FRIDAY Navigation">
-      <div class="logo-slot" aria-label="FRIDAY Logo">
+      <button class="logo-slot" type="button" data-view="landing" aria-label="FRIDAY home">
         <img src="assets/black.png" onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='/files/black.png';}" alt="FRIDAY logo" class="sidebar-logo-img" />
-      </div>
+      </button>
 
       <ul class="nav-list" aria-label="Services navigation">
         <li class="nav-item">
@@ -814,14 +941,14 @@
     </aside>
 
     <!-- Main Content Area -->
-    <main class="main-content">
+    <main class="main-content" id="portalMain" tabindex="-1">
       <!-- Top Bar: Pure Icon Actions (Theme & Profile) -->
-      <header class="topbar">
+      <header class="topbar" id="globalTopbar">
         <div class="top-actions">
           <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle theme">
             <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8A9.03 9.03 0 0 0 12 3z"/></svg>
           </button>
-          <button class="icon-btn" type="button" aria-label="Personal profile">
+          <button class="icon-btn" type="button" data-view="login" aria-label="Personal profile">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c.8-3.4 3.3-5 8-5s7.2 1.6 8 5"/></svg>
           </button>
         </div>
@@ -892,131 +1019,529 @@
       </nav>
     </main>
 
-    <section class="deadline-panel" id="deadlinePanel" aria-labelledby="deadlineTitle" aria-hidden="true">
+    <section class="deadline-panel" id="deadlinePanel" aria-labelledby="deadlineTitle" aria-hidden="true" hidden inert>
       <div class="deadline-panel__header">
-        <div><p class="deadline-panel__eyebrow">Plan ahead</p><h2 id="deadlineTitle">Deadlines</h2></div>
-        <button class="deadline-panel__close" id="deadlineClose" type="button" aria-label="Close deadlines">×</button>
+        <div><p class="deadline-panel__eyebrow">Plan ahead</p><h2 id="deadlineTitle" tabindex="-1">Deadlines</h2><p class="page-description">University dates and personal tasks, together.</p></div>
+        <button class="deadline-panel__close" id="deadlineClose" data-close type="button" aria-label="Back to portal">×</button>
       </div>
-      <div class="deadline-list">
-        <article class="deadline-card"><div><h3>Registration window</h3><p>Review your course plan before registration opens.</p></div><time datetime="2026-11-02">Nov 2, 2026</time></article>
-        <article class="deadline-card"><div><h3>Tuition payment</h3><p>Confirm your payment or approved funding arrangement.</p></div><time datetime="2026-11-08">Nov 8, 2026</time></article>
-        <article class="deadline-card"><div><h3>Advisor meeting</h3><p>Bring your degree progress questions to your next meeting.</p></div><time datetime="2026-11-12">Nov 12, 2026</time></article>
-      </div>
+      <div class="page-content" id="deadlineContent"></div>
     </section>
 
-    <section class="schedule-panel" id="schedulePanel" aria-labelledby="scheduleTitle" aria-hidden="true">
+    <section class="schedule-panel" id="schedulePanel" aria-labelledby="scheduleTitle" aria-hidden="true" hidden inert>
       <div class="schedule-panel__header">
-        <div><p class="schedule-panel__eyebrow" id="scheduleEyebrow">Live from Connect</p><h2 id="scheduleTitle">Class schedule</h2></div>
-        <button class="schedule-panel__close" id="scheduleClose" type="button" aria-label="Close schedule">×</button>
+        <div><p class="schedule-panel__eyebrow" id="scheduleEyebrow">Public Connect data</p><h2 id="scheduleTitle" tabindex="-1">Class schedule</h2><p class="page-description">Browse public sections. These records are not your personal enrollments.</p></div>
+        <button class="schedule-panel__close" id="scheduleClose" data-close type="button" aria-label="Back to portal">×</button>
       </div>
       <div class="schedule-toolbar">
-        <input id="scheduleSearch" type="search" placeholder="Search course or name" aria-label="Search course or name" />
-        <input id="facultySearch" type="search" placeholder="Faculty initials" aria-label="Filter by faculty initials" />
+        <label>Course or name<input id="scheduleSearch" type="search" placeholder="Search course or name" /></label>
+        <label>Faculty initials<input id="facultySearch" type="search" placeholder="Filter by faculty initials" /></label>
+        <button class="action-button" data-action="refresh-schedule" type="button">Refresh data</button>
       </div>
-      <p class="schedule-status" id="scheduleStatus">Loading public schedule data…</p>
+      <p class="schedule-status" id="scheduleStatus" role="status">Loading public schedule data…</p>
       <div class="schedule-table-wrap">
-        <table class="schedule-table"><thead id="scheduleHead"></thead><tbody id="scheduleBody"></tbody></table>
+        <table class="schedule-table"><caption class="sr-only" id="scheduleCaption">Public class schedule</caption><thead id="scheduleHead"></thead><tbody id="scheduleBody"></tbody></table>
       </div>
     </section>
+    <section class="page-panel" id="featurePanel" aria-labelledby="featureTitle" aria-hidden="true" hidden inert>
+      <div class="page-panel__header">
+        <div><p class="page-panel__eyebrow" id="featureEyebrow"></p><h2 id="featureTitle" tabindex="-1"></h2><p class="page-description" id="featureDescription"></p></div>
+        <button class="page-panel__close" data-close type="button" aria-label="Back to portal">×</button>
+      </div>
+      <div class="page-content" id="featureContent"></div>
+    </section>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
   </div>
 
   <script>
+    // Everything below, except the public schedule feed, is an in-memory demo.
+    const $ = id => document.getElementById(id);
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
     const SCHEDULE_DATA_URL = 'https://usis-cdn.eniamza.com/connect-migrate.json';
-    const deadlinePanel = document.getElementById('deadlinePanel');
-    const deadlineClose = document.getElementById('deadlineClose');
-    const schedulePanel = document.getElementById('schedulePanel');
-    const scheduleTitle = document.getElementById('scheduleTitle');
-    const scheduleEyebrow = document.getElementById('scheduleEyebrow');
-    const scheduleHead = document.getElementById('scheduleHead');
-    const scheduleBody = document.getElementById('scheduleBody');
-    const scheduleStatus = document.getElementById('scheduleStatus');
-    const scheduleSearch = document.getElementById('scheduleSearch');
-    const facultySearch = document.getElementById('facultySearch');
+    const views = Object.freeze({
+      landing: { title: 'Portal' },
+      class: { title: 'Class schedule' }, exam: { title: 'Exam schedule' },
+      deadlines: { title: 'Deadlines' },
+      login: { title: 'Welcome back', eyebrow: 'Your FRIDAY account', description: 'Explore the sign-in experience with example details. Real accounts are coming in the production app.', render: renderLogin },
+      notices: { title: 'Notice board', eyebrow: 'Stay in the loop', description: 'Find the updates that matter, without the inbox clutter.', render: renderNotices },
+      attendance: { title: 'Attendance', eyebrow: 'A little consistency goes far', description: 'See where you stand across your current courses.', render: renderAttendance },
+      degree: { title: 'Degree progress', eyebrow: 'One course closer', description: 'A clear picture of completed credits and what comes next.', render: renderDegree },
+      registration: { title: 'Registration Copilot', eyebrow: 'Plan before registration opens', description: 'Explore an example course plan around your preferences.', render: renderRegistration },
+      planner: { title: 'Semester planner', eyebrow: 'Make room for your goals', description: 'Arrange an example course load, one semester at a time.', render: renderPlanner },
+      assistant: { title: 'University assistant', eyebrow: 'A little guidance', description: 'Preview how an assistant could help you navigate FRIDAY.', render: renderAssistant },
+      about: { title: 'About FRIDAY', eyebrow: 'Student OS', description: 'A calmer place to manage university life.', render: () => infoCard('Everything in one place', 'FRIDAY brings schedules, deadlines, notices, and degree planning into one student portal. This is an early frontend prototype: only the public schedule browser connects to an external data source.') },
+      privacy: { title: 'Privacy preview', eyebrow: 'About this prototype', description: 'What this local demo does with your information.', render: () => infoCard('Your demo data stays in this tab', 'Sign-in fields are never sent or saved by this page. Personal deadlines, course plans, and read indicators live in memory and reset on reload. The schedule browser requests public data from the Connect CDN; the Inter font is loaded from Google Fonts. Production privacy terms will be published before real accounts launch.') },
+      terms: { title: 'Terms preview', eyebrow: 'Before you explore', description: 'This prototype is for demonstration.', render: () => infoCard('Check official university sources', 'Example notices, deadlines, attendance, and degree totals are fictional. Public schedule records may change or become unavailable. Confirm course registration, exam dates, and payment deadlines with your official university portal. FRIDAY does not register courses or process payments.') },
+      support: { title: 'Support FRIDAY', eyebrow: 'Help shape what comes next', description: 'Feedback today helps build a better student experience.', render: () => infoCard('Try a student journey', 'Browse a class schedule, add a temporary personal deadline, and explore the notice board. Feedback and donation channels have not been published yet. No payment or support request is collected in this prototype.') },
+      community: { title: 'FRIDAY community', eyebrow: 'Build it together', description: 'A place for student feedback is on the roadmap.', render: () => infoCard('Community invitations are coming', 'The official community channel has not been announced. For now, explore the prototype and keep a note of the features that would help you most.') }
+    });
+    const featurePanel = $('featurePanel');
+    const panels = [$('deadlinePanel'), $('schedulePanel'), featurePanel];
+    const main = $('portalMain');
+    const sidebar = $('portalSidebar');
+    const scheduleChoices = $('scheduleChoices');
+    const schedulesButton = document.querySelector('.nav-button');
+    const toggleBtn = $('sidebarToggle');
+    const themeBtn = $('themeToggle');
+    // Keep account/theme controls accessible on every page.
+    document.querySelector('.portal-shell').append($('globalTopbar'));
+    let activeView = 'landing';
+    let returnFocus = null;
+    let toastTimer;
+    let registrationTimer;
+    let loginTimer;
+    const demoBanner = '<div class="demo-banner">◌ Frontend demo · example records. Changes last until you reload this page.</div>';
+    const button = (label, attributes = '') => `<button class="action-button" type="button" ${attributes}>${label}</button>`;
+    const infoCard = (title, copy) => `<article class="state-card"><h3>${title}</h3><p>${copy}</p></article>`;
+    const metric = (value, label) => `<div class="metric"><strong>${value}</strong><span>${label}</span></div>`;
+
+    function announce(message) {
+      clearTimeout(toastTimer);
+      $('toast').textContent = message;
+      $('toast').hidden = false;
+      toastTimer = setTimeout(() => { $('toast').hidden = true; }, 5500);
+    }
+
+    function setActiveView(name) {
+      document.querySelectorAll('[data-view]').forEach(control => {
+        if (control.dataset.view === name) control.setAttribute('aria-current', 'page');
+        else control.removeAttribute('aria-current');
+      });
+      if (name === 'class' || name === 'exam') {
+        scheduleChoices.classList.add('open');
+        schedulesButton.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    function routeFromHash() {
+      const hash = location.hash.slice(1);
+      const aliases = { schedules: 'class', portal: 'login', portalMain: 'landing' };
+      const name = aliases[hash] || hash || 'landing';
+      return Object.hasOwn(views, name) ? name : 'landing';
+    }
+
+    function openView(name, { history = true, focus = true } = {}) {
+      if (!Object.hasOwn(views, name)) name = 'landing';
+      const previous = activeView;
+      if (previous === 'landing' && name !== 'landing') returnFocus = document.activeElement;
+      clearTimeout(loginTimer);
+      clearTimeout(registrationTimer);
+      if (scheduleController) { scheduleController.abort(); scheduleController = null; }
+      panels.forEach(panel => {
+        panel.hidden = true; panel.inert = true;
+        panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true');
+      });
+      activeView = name;
+      document.title = name === 'landing' ? 'FRIDAY — Student OS' : `${views[name].title} · FRIDAY`;
+      main.inert = name !== 'landing';
+      main.hidden = name !== 'landing';
+      main.setAttribute('aria-hidden', String(name !== 'landing'));
+      let panel;
+      let heading;
+      if (name === 'class' || name === 'exam') {
+        panel = $('schedulePanel'); heading = $('scheduleTitle');
+        openSchedule(name);
+      } else if (name === 'deadlines') {
+        panel = $('deadlinePanel'); heading = $('deadlineTitle');
+        renderDeadlines();
+      } else if (name !== 'landing') {
+        panel = featurePanel; heading = $('featureTitle');
+        $('featureEyebrow').textContent = views[name].eyebrow;
+        heading.textContent = views[name].title;
+        $('featureDescription').textContent = views[name].description;
+        $('featureContent').innerHTML = views[name].render();
+        afterRender(name);
+      }
+      if (panel) {
+        panel.hidden = false; panel.inert = false;
+        panel.classList.add('open'); panel.setAttribute('aria-hidden', 'false'); panel.scrollTop = 0;
+      }
+      setActiveView(name);
+      if (history) window.history.pushState({ view: name }, '', `${location.pathname}${location.search}${name === 'landing' ? '' : '#' + name}`);
+      if (focus) {
+        if (heading) heading.focus({ preventScroll: true });
+        else if (returnFocus?.isConnected && !returnFocus.closest('[hidden], [inert]')) returnFocus.focus({ preventScroll: true });
+        else main.focus({ preventScroll: true });
+      }
+    }
+    function closeView() { openView('landing'); }
+
+    const navigation = {
+      'Deadlines': 'deadlines', 'Notices': 'notices', 'Attendance': 'attendance', 'Assistant': 'assistant',
+      'Degree Progress': 'degree', 'Registration Copilot': 'registration', 'Semester Planner': 'planner',
+      'Planner': 'planner', 'Degree Tracker': 'degree', 'Class Schedule': 'class', 'Class': 'class', 'Exam': 'exam',
+      'Support FRIDAY': 'support', 'Support': 'support', 'Join Community': 'community', 'About': 'about',
+      'Privacy policy': 'privacy', 'Terms and conditions': 'terms', 'Open Schedules': 'class', 'Open Portal': 'login'
+    };
+    document.querySelectorAll('.nav-button, .sub-button, .quick-chip, .hero-actions a, .bottom-links button, .sub-meta button').forEach(control => {
+      const label = control.textContent.trim();
+      control.setAttribute('aria-label', label);
+      if (navigation[label]) {
+        control.dataset.view = navigation[label];
+        if (control.tagName === 'A') control.href = '#' + navigation[label];
+      }
+    });
+
+    // Public schedule data is escaped and validated before it reaches the DOM.
     let scheduleRows = [];
     let scheduleLoadedAt = null;
     let scheduleMode = 'class';
-
-    const formatTime = value => value ? new Date(`1970-01-01T${value}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '—';
-    const formatDate = value => value ? new Date(`${value}T00:00:00`).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-    const classMeetings = row => (row.sectionSchedule?.classSchedules || []).map(item => `${item.day.slice(0, 3)} ${formatTime(item.startTime)}–${formatTime(item.endTime)}`).join(' · ') || 'Schedule pending';
-    const examMeetings = row => { const exam = row.sectionSchedule; return [exam?.midExamDate ? `Midterm · ${formatDate(exam.midExamDate)} · ${formatTime(exam.midExamStartTime)}–${formatTime(exam.midExamEndTime)}` : '', exam?.finalExamDate ? `Final · ${formatDate(exam.finalExamDate)} · ${formatTime(exam.finalExamStartTime)}–${formatTime(exam.finalExamEndTime)}` : ''].filter(Boolean).join('<br>') || 'Exam date pending'; };
+    let scheduleController = null;
+    let scheduleError = false;
+    const formatTime = value => {
+      if (typeof value !== 'string' || !/^\d{2}:\d{2}(:\d{2})?$/.test(value)) return '—';
+      const date = new Date(`1970-01-01T${value}`);
+      return Number.isNaN(date.getTime()) ? '—' : date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    };
+    const formatDate = value => {
+      if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return '—';
+      const date = new Date(`${value}T00:00:00`);
+      return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+    const meetingText = meetings => Array.isArray(meetings) ? meetings.filter(item => item && typeof item === 'object').map(item => `${String(item.day || '').slice(0, 3)} ${formatTime(item.startTime)}–${formatTime(item.endTime)}`).join(' · ') : '';
+    const classMeetings = row => escapeHtml(meetingText(row.sectionSchedule?.classSchedules) || 'Schedule pending');
+    const examMeetings = row => {
+      const exam = row.sectionSchedule;
+      return [exam?.midExamDate ? `Midterm · ${formatDate(exam.midExamDate)} · ${formatTime(exam.midExamStartTime)}–${formatTime(exam.midExamEndTime)}` : '', exam?.finalExamDate ? `Final · ${formatDate(exam.finalExamDate)} · ${formatTime(exam.finalExamStartTime)}–${formatTime(exam.finalExamEndTime)}` : ''].filter(Boolean).map(escapeHtml).join('<br>') || 'Exam date pending';
+    };
 
     function renderSchedule() {
-      const query = scheduleSearch.value.trim().toLowerCase();
-      const faculty = facultySearch.value.trim().toLowerCase();
-      const rows = scheduleRows
-        .filter(row => (!query || `${row.courseCode} ${row.courseName}`.toLowerCase().includes(query)) && (!faculty || `${row.faculties || ''} ${row.labFaculties || ''}`.toLowerCase().includes(faculty)))
+      const query = $('scheduleSearch').value.trim().toLowerCase();
+      const faculty = $('facultySearch').value.trim().toLowerCase();
+      const rows = scheduleRows.filter(row => (!query || `${row.courseCode || ''} ${row.courseName || ''}`.toLowerCase().includes(query)) && (!faculty || `${row.faculties || ''} ${row.labFaculties || ''}`.toLowerCase().includes(faculty)))
         .sort((a, b) => `${a.courseCode || ''} ${a.courseName || ''} ${a.sectionName || ''}`.localeCompare(`${b.courseCode || ''} ${b.courseName || ''} ${b.sectionName || ''}`, undefined, { numeric: true, sensitivity: 'base' }));
-      const updatedLabel = scheduleLoadedAt ? ` · updated ${scheduleLoadedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : '';
-      scheduleStatus.textContent = `${rows.length.toLocaleString()} ${scheduleMode === 'class' ? 'class sections' : 'exam sections'} · public data from Connect${updatedLabel}`;
-      scheduleHead.innerHTML = scheduleMode === 'class' ? '<tr><th>Course</th><th>Faculty</th><th>When</th><th>Room</th><th>Seats</th></tr>' : '<tr><th>Course</th><th>Faculty</th><th>Exams</th><th>Section</th></tr>';
-      scheduleBody.innerHTML = rows.map(row => scheduleMode === 'class' ? `<tr><td><strong>${row.courseCode} · ${row.sectionName || '—'}</strong><small>${row.courseName || 'Course name unavailable'}</small></td><td><span class="schedule-badge">${row.faculties || 'TBA'}</span></td><td>${classMeetings(row)}${row.labSchedules?.length ? `<br><small>Lab: ${row.labSchedules.map(item => `${item.day.slice(0,3)} ${formatTime(item.startTime)}–${formatTime(item.endTime)}`).join(' · ')}</small>` : ''}</td><td>${row.roomName || 'TBA'}</td><td>${row.capacity != null ? `${row.consumedSeat || 0}/${row.capacity}` : '—'}</td></tr>` : `<tr><td><strong>${row.courseCode} · ${row.sectionName || '—'}</strong><small>${row.courseName || 'Course name unavailable'}</small></td><td><span class="schedule-badge">${row.faculties || 'TBA'}</span></td><td>${examMeetings(row)}</td><td>${row.sectionType || '—'}</td></tr>`).join('') || '<tr><td colspan="5">No matching schedule records.</td></tr>';
+      const columns = scheduleMode === 'class' ? 5 : 4;
+      const headings = scheduleMode === 'class' ? ['Course', 'Faculty', 'When', 'Room', 'Seats'] : ['Course', 'Faculty', 'Exams', 'Section'];
+      $('scheduleHead').innerHTML = `<tr>${headings.map(label => `<th scope="col">${label}</th>`).join('')}</tr>`;
+      $('scheduleCaption').textContent = `Public ${scheduleMode} schedule`;
+      const updated = scheduleLoadedAt ? ` · fetched ${scheduleLoadedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} (source freshness unknown)` : '';
+      $('scheduleStatus').textContent = `${rows.length.toLocaleString()} ${scheduleMode === 'class' ? 'class sections' : 'exam sections'} · public data from Connect${updated}${scheduleError ? ' · Refresh failed; showing previously fetched records. Try Refresh data.' : ''}`;
+      $('scheduleBody').innerHTML = rows.map(row => {
+        const course = `<td><strong>${escapeHtml(row.courseCode)} · ${escapeHtml(row.sectionName || '—')}</strong><small>${escapeHtml(row.courseName || 'Course name unavailable')}</small></td><td><span class="schedule-badge">${escapeHtml(row.faculties || 'TBA')}</span></td>`;
+        return scheduleMode === 'class' ? `<tr>${course}<td>${classMeetings(row)}${Array.isArray(row.labSchedules) && row.labSchedules.length ? `<br><small>Lab: ${escapeHtml(meetingText(row.labSchedules))}</small>` : ''}</td><td>${escapeHtml(row.roomName || 'TBA')}</td><td>${Number.isFinite(row.capacity) ? `${escapeHtml(row.consumedSeat ?? 0)}/${escapeHtml(row.capacity)}` : '—'}</td></tr>` : `<tr>${course}<td>${examMeetings(row)}</td><td>${escapeHtml(row.sectionType || '—')}</td></tr>`;
+      }).join('') || `<tr><td colspan="${columns}">${scheduleError ? 'Schedule data is unavailable. Use Refresh data to retry.' : 'No matching schedule records. Try another course or faculty.'}</td></tr>`;
     }
 
     async function openSchedule(mode) {
       scheduleMode = mode;
-      scheduleTitle.textContent = mode === 'class' ? 'Class schedule' : 'Exam schedule';
-      scheduleEyebrow.textContent = mode === 'class' ? 'Classes, labs, and faculty initials' : 'Midterms and finals from Connect';
-      schedulePanel.classList.add('open'); schedulePanel.setAttribute('aria-hidden', 'false');
+      $('scheduleTitle').textContent = views[mode].title;
+      $('scheduleEyebrow').textContent = mode === 'class' ? 'Classes, labs, and faculty initials' : 'Midterms and finals from Connect';
+      if (scheduleController) scheduleController.abort();
+      const controller = new AbortController();
+      scheduleController = controller;
+      scheduleError = false;
+      $('schedulePanel').setAttribute('aria-busy', 'true');
+      renderSchedule();
+      $('scheduleStatus').textContent = scheduleRows.length ? 'Refreshing public data… Previous records remain available.' : 'Loading public schedule data…';
+      const timeout = setTimeout(() => controller.abort(), 15000);
       try {
-        const response = await fetch(`${SCHEDULE_DATA_URL}?refresh=${Date.now()}`, { cache: 'no-store' });
+        const response = await fetch(`${SCHEDULE_DATA_URL}?refresh=${Date.now()}`, { cache: 'no-store', signal: controller.signal });
         if (!response.ok) throw new Error('Schedule source unavailable');
         const payload = await response.json();
-        scheduleRows = Array.isArray(payload.courses) ? payload.courses : [];
+        if (!payload || !Array.isArray(payload.courses)) throw new Error('Unexpected schedule format');
+        if (scheduleController !== controller) return;
+        scheduleRows = payload.courses.filter(row => row && typeof row === 'object' && !Array.isArray(row) && typeof row.courseCode === 'string');
         scheduleLoadedAt = new Date();
         renderSchedule();
-      } catch (error) { scheduleStatus.textContent = 'Schedule data could not be loaded. Check your connection and try again.'; }
+      } catch (error) {
+        if (scheduleController !== controller) return;
+        scheduleError = true;
+        renderSchedule();
+        if (!scheduleRows.length) $('scheduleStatus').textContent = 'Schedule data could not be loaded. Check your connection and use Refresh data to try again.';
+      } finally {
+        clearTimeout(timeout);
+        if (scheduleController === controller) {
+          $('schedulePanel').setAttribute('aria-busy', 'false');
+          scheduleController = null;
+        }
+      }
     }
 
-    const schedulesButton = document.querySelector('.nav-button');
-    const scheduleChoices = document.querySelector('.sub-list');
-    const navButtons = [...document.querySelectorAll('.nav-button')];
-    const deadlinesButton = navButtons.find(button => button.textContent.trim() === 'Deadlines');
-    const closePanels = () => {
-      deadlinePanel.classList.remove('open');
-      schedulePanel.classList.remove('open');
-      deadlinePanel.setAttribute('aria-hidden', 'true');
-      schedulePanel.setAttribute('aria-hidden', 'true');
+    function renderLogin() {
+      return `<div class="demo-banner">◌ Demo sign-in only. Use made-up details; nothing is sent or saved.</div>
+        <form id="loginForm" class="demo-card stack login-card" novalidate>
+          <div class="field"><label for="loginEmail">University email</label><input id="loginEmail" type="email" autocomplete="off" placeholder="student@example.edu" aria-describedby="emailError" required /><span id="emailError" class="field-error"></span></div>
+          <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="off" placeholder="Use a made-up password" aria-describedby="passwordError" required /><span id="passwordError" class="field-error"></span></div>
+          <label class="check-label"><input type="checkbox" id="rememberMe" />Remember me (preview only)</label>
+          <button class="action-button primary" type="submit">Try demo sign-in</button>
+          <div class="actions">${button('Forgot password?', 'data-action="forgot-password"')}${button('Back to portal', 'data-close')}</div>
+          <p class="form-notice" id="loginMessage" role="status">A real account is not required to explore this prototype.</p>
+        </form>`;
+    }
+
+    const noticeRecords = [
+      { id: 'registration', title: 'Registration preparation opens', category: 'Academic', date: '2026-11-02', text: 'Review prerequisites and draft your course plan before the registration window.', read: false },
+      { id: 'tuition', title: 'Tuition reminder', category: 'Administrative', date: '2026-11-08', text: 'Check your official portal for payment details and approved funding arrangements.', read: false },
+      { id: 'advising', title: 'Meet your academic advisor', category: 'Events', date: '2026-11-12', text: 'Bring your degree progress questions to the next advising session.', read: true }
+    ];
+    let noticeCategory = 'All';
+    let noticeQuery = '';
+    let noticeUnread = false;
+    function renderNotices() {
+      return `${demoBanner}<div class="toolbar"><label>Search notices<input id="noticeSearch" type="search" placeholder="Search by title or description" value="${escapeHtml(noticeQuery)}" /></label><label class="check-label"><input id="noticeUnread" type="checkbox" ${noticeUnread ? 'checked' : ''} />Unread only</label></div>
+        <div class="filter-chips" aria-label="Notice categories">${['All', 'Academic', 'Administrative', 'Events'].map(category => button(category, `data-action="notice-category" data-category="${category}" aria-pressed="${noticeCategory === category}"`)).join('')}</div>
+        <p class="muted" id="noticeCount" role="status"></p><div class="demo-list" id="noticeResults"></div>`;
+    }
+    function renderNoticeResults() {
+      const rows = noticeRecords.filter(notice => (noticeCategory === 'All' || notice.category === noticeCategory) && (!noticeUnread || !notice.read) && `${notice.title} ${notice.text}`.toLowerCase().includes(noticeQuery.toLowerCase()));
+      $('noticeCount').textContent = `${rows.length} notices · ${noticeRecords.filter(notice => !notice.read).length} unread in this demo`;
+      $('noticeResults').innerHTML = rows.map(notice => `<article class="demo-card stack"><div class="row"><span class="status-chip">${notice.category}</span><span class="status-chip">${notice.read ? '✓ Read' : '● Unread'}</span></div><div><h3>${notice.title}</h3><p>${notice.text}</p></div><div class="row"><time class="muted" datetime="${notice.date}">${formatDate(notice.date)}</time>${button(notice.read ? 'Mark unread' : 'Mark read', `data-action="notice-read" data-id="${notice.id}"`)}</div></article>`).join('') || `${infoCard('No notices match', 'Try another search or reset your filters.')}${button('Reset filters', 'data-action="notice-reset"')}`;
+    }
+
+    function renderAttendance() {
+      return `${demoBanner}<div class="toolbar"><label>Demo scenario<select id="attendanceScenario"><option value="records">Example records</option><option value="empty">No enrolled courses</option><option value="error">Records unavailable</option></select></label></div><div id="attendanceRecords" class="stack"></div>`;
+    }
+    function renderAttendanceRecords() {
+      const scenario = $('attendanceScenario').value;
+      if (scenario === 'empty') {
+        $('attendanceRecords').innerHTML = `${infoCard('No courses yet', 'Add enrolled sections when your real profile is available. Browse public sections in the meantime.')}${button('Browse classes', 'data-view="class"')}`;
+        return;
+      }
+      if (scenario === 'error') {
+        $('attendanceRecords').innerHTML = `${infoCard('Attendance records are unavailable', 'This is an example error state. Your real records are not connected.')}${button('Retry demo records', 'data-action="attendance-retry"')}`;
+        return;
+      }
+      const courses = [{ code: 'CSE220', name: 'Data structures', attended: 18, total: 20 }, { code: 'MAT215', name: 'Mathematics III', attended: 15, total: 20 }, { code: 'ENG102', name: 'Composition', attended: 13, total: 20 }];
+      $('attendanceRecords').innerHTML = `<div class="metric-grid">${metric('77%', 'Overall example attendance')}${metric('75%', 'Example minimum threshold')}${metric('1', 'Course below threshold')}</div><article class="demo-card"><h3>Your courses</h3>${courses.map(course => {
+        const percent = Math.round(course.attended / course.total * 100);
+        return `<div class="course-row"><div><strong>${course.code} · ${course.name}</strong><small>${course.attended} of ${course.total} held sessions attended · ${percent}%</small><div class="progress-track" role="progressbar" aria-label="${course.code} attendance" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"><span style="width:${percent}%"></span></div></div><span class="status-chip ${percent < 75 ? 'warning' : 'positive'}">${percent < 75 ? '⚠ Below threshold' : percent === 75 ? '◷ At threshold' : '✓ On track'}</span></div>`;
+      }).join('')}</article><p class="muted">These totals are examples. Your university’s actual attendance policy must be confirmed before absence allowances are calculated.</p>`;
+    }
+
+    function renderDegree() {
+      const groups = [{ name: 'Core courses', completed: 30, required: 60 }, { name: 'Major requirements', completed: 15, required: 40 }, { name: 'Electives and general education', completed: 9, required: 24 }];
+      return `${demoBanner}<div class="demo-banner">◷ Your academic history is not connected. <a href="#login" data-view="login">Preview account setup</a> to see the entry point for a future profile.</div>
+        <div class="metric-grid">${metric('54', 'Completed example credits')}${metric('12', 'In-progress example credits')}${metric('58', 'Credits left after current courses')}</div>
+        <article class="demo-card stack"><div class="row"><h3>54 of 124 credits completed</h3><span class="status-chip">◷ 44% complete</span></div><div class="progress-track" role="progressbar" aria-label="Degree credits completed" aria-valuenow="54" aria-valuemin="0" aria-valuemax="124"><span style="width:43.55%"></span></div><p>70 credits remain before counting the 12 currently in progress.</p></article>
+        <article class="demo-card"><h3>Requirement groups</h3>${groups.map(group => `<div class="course-row"><div><strong>${group.name}</strong><small>${group.completed} completed · ${group.required - group.completed} not yet completed</small></div><span class="status-chip">${group.completed} / ${group.required} credits</span></div>`).join('')}</article>
+        <article class="state-card"><h3>Prerequisite preview</h3><p>◷ CSE221 is blocked until CSE220 is completed. Eligibility and graduation estimates will use your actual records in the production app.</p></article>`;
+    }
+
+    function renderRegistration() {
+      return `${demoBanner}<div class="split-grid"><form id="registrationForm" class="demo-card stack"><h3>Your preferences</h3><div class="field"><label for="registrationTerm">Semester</label><select id="registrationTerm"><option>Autumn 2026</option><option>Spring 2027</option></select></div><label class="check-label"><input id="avoidEarly" type="checkbox" checked />Prefer classes after 9 am</label><label class="check-label"><input id="compactWeek" type="checkbox" />Prefer fewer campus days</label><button class="action-button primary" type="submit">Preview example plan</button><p class="form-notice">This preview chooses a fixed example, not an optimized plan from live sections.</p></form><div id="registrationResult" role="status">${infoCard('Start with your preferences', 'Preview an example result, including a schedule conflict warning. No courses will be registered.')}</div></div>`;
+    }
+
+    const plannerCourses = {
+      cse220: { code: 'CSE220', name: 'Data structures', credits: 3, meetings: 'Sun / Tue · 10:00–11:20 am', sessions: 2 },
+      mat215: { code: 'MAT215', name: 'Mathematics III', credits: 3, meetings: 'Mon / Wed · 11:30 am–12:50 pm', sessions: 2 },
+      eng102: { code: 'ENG102', name: 'Composition', credits: 3, meetings: 'Sun / Tue · 1:00–2:20 pm', sessions: 2 },
+      cse230: { code: 'CSE230', name: 'Discrete mathematics', credits: 3, meetings: 'Mon / Wed · 2:30–3:50 pm', sessions: 2 }
     };
-    deadlinesButton.addEventListener('click', () => {
-      closePanels();
-      deadlinePanel.classList.add('open');
-      deadlinePanel.setAttribute('aria-hidden', 'false');
+    const plannedTerms = { 'Autumn 2026': ['cse220', 'mat215', 'eng102'], 'Spring 2027': [] };
+    let plannerTerm = 'Autumn 2026';
+    function renderPlanner() {
+      return `${demoBanner}<div class="toolbar"><label>Semester<select id="plannerTerm">${Object.keys(plannedTerms).map(term => `<option ${term === plannerTerm ? 'selected' : ''}>${term}</option>`).join('')}</select></label></div><div id="plannerSummary" class="stack"></div><form id="plannerAdd" class="demo-card stack"><h3>Add an example course</h3><div class="field"><label for="plannerCourse">Course</label><select id="plannerCourse"></select></div><button class="action-button" type="submit">Add to this demo semester</button></form>`;
+    }
+    function renderPlannerSummary() {
+      const courses = plannedTerms[plannerTerm].map(id => plannerCourses[id]);
+      $('plannerSummary').innerHTML = courses.length ? `<div class="metric-grid">${metric(courses.length, 'Planned courses')}${metric(courses.reduce((sum, course) => sum + course.credits, 0), 'Planned credits')}${metric(courses.reduce((sum, course) => sum + course.sessions, 0), 'Weekly class meetings')}</div><article class="demo-card"><h3>${plannerTerm} example plan</h3>${plannedTerms[plannerTerm].map(id => `<div class="course-row"><div><strong>${plannerCourses[id].code} · ${plannerCourses[id].name}</strong><small>${plannerCourses[id].credits} credits · ${plannerCourses[id].meetings}</small></div>${button('Remove', `data-action="planner-remove" data-id="${id}" aria-label="Remove ${plannerCourses[id].code}"`)}</div>`).join('')}</article>` : infoCard('A fresh semester', 'No courses are planned for this term. Add an example course below to explore the layout.');
+      const available = Object.entries(plannerCourses).filter(([id]) => !plannedTerms[plannerTerm].includes(id));
+      $('plannerCourse').innerHTML = available.map(([id, course]) => `<option value="${id}">${course.code} · ${course.name}</option>`).join('') || '<option>All example courses added</option>';
+      $('plannerAdd').querySelector('button').disabled = !available.length;
+      $('plannerCourse').disabled = !available.length;
+    }
+
+    function renderAssistant() {
+      return `${demoBanner}<article class="state-card"><h3>What would you like to find?</h3><p>This is a guided preview. A real AI assistant and private student records are not connected.</p></article><div class="actions">${button('Find my schedule', 'data-action="assistant-topic" data-topic="schedule"')}${button('Check my deadlines', 'data-action="assistant-topic" data-topic="deadlines"')}${button('Explain my degree progress', 'data-action="assistant-topic" data-topic="degree"')}</div><div id="assistantAnswer" role="status"></div>`;
+    }
+
+    const deadlineRecords = [
+      { id: 'registration', title: 'Registration window', description: 'Review your course plan before registration opens.', due: '2026-11-02', source: 'University', done: false },
+      { id: 'tuition', title: 'Tuition payment', description: 'Confirm your payment or approved funding arrangement.', due: '2026-11-08', source: 'University', done: false },
+      { id: 'advisor', title: 'Advisor meeting', description: 'Bring your degree progress questions to your next meeting.', due: '2026-11-12', source: 'Personal', done: false }
+    ];
+    let deadlineFilter = 'all';
+    function localToday() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+    function renderDeadlines() {
+      $('deadlineContent').innerHTML = `${demoBanner}<div class="row"><label class="field">Show deadlines<select id="deadlineFilter">${[['all', 'All deadlines'], ['University', 'University'], ['Personal', 'Personal'], ['done', 'Completed']].map(([value, label]) => `<option value="${value}" ${deadlineFilter === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>${button('Add personal deadline', 'data-action="deadline-form" aria-expanded="false" aria-controls="deadlineForm"')}</div>
+        <form id="deadlineForm" class="demo-card stack" hidden novalidate><h3>Add a personal deadline</h3><div class="field"><label for="deadlineName">Title</label><input id="deadlineName" maxlength="120" required aria-describedby="deadlineError" /></div><div class="field"><label for="deadlineDate">Due date</label><input id="deadlineDate" type="date" min="${localToday()}" required aria-describedby="deadlineError" /></div><p class="field-error" id="deadlineError" role="status"></p><div class="actions"><button class="action-button primary" type="submit">Add to demo</button>${button('Cancel', 'data-action="deadline-cancel"')}</div><p class="form-notice">This deadline will reset when you reload. University deadlines cannot be edited here.</p></form>
+        <p class="muted" id="deadlineCount" role="status"></p><div class="demo-list" id="deadlineResults"></div>`;
+      renderDeadlineResults();
+    }
+    function deadlineGroup(record) {
+      if (record.done) return 'Completed';
+      if (record.due < localToday()) return 'Overdue';
+      if (record.due === localToday()) return 'Due today';
+      const until = (new Date(`${record.due}T12:00:00`) - new Date(`${localToday()}T12:00:00`)) / 86400000;
+      return until <= 7 ? 'Next 7 days' : 'Later';
+    }
+    function renderDeadlineResults() {
+      const records = deadlineRecords.filter(record => deadlineFilter === 'all' || (deadlineFilter === 'done' ? record.done : record.source === deadlineFilter)).sort((a, b) => a.due.localeCompare(b.due));
+      $('deadlineCount').textContent = `${records.length} example deadlines · changes are temporary`;
+      $('deadlineResults').innerHTML = ['Overdue', 'Due today', 'Next 7 days', 'Later', 'Completed'].map(group => {
+        const grouped = records.filter(record => deadlineGroup(record) === group);
+        if (!grouped.length) return '';
+        return `<h3 class="deadline-heading">${group}</h3>${grouped.map(record => `<article class="deadline-card ${record.done ? 'is-done' : ''}"><div><span class="status-chip">${record.source === 'University' ? '▣ University · example' : '○ Personal · demo'}</span><h3>${escapeHtml(record.title)}</h3><p>${escapeHtml(record.description)}</p></div><div class="stack"><time datetime="${record.due}">${formatDate(record.due)}</time>${record.source === 'Personal' ? `<div class="actions">${button(record.done ? 'Reopen' : 'Mark done', `data-action="deadline-done" data-id="${record.id}"`)}${button('Remove', `data-action="deadline-remove" data-id="${record.id}" aria-label="Remove ${escapeHtml(record.title)}"`)}</div>` : '<span class="muted">Read-only example</span>'}</div></article>`).join('')}`;
+      }).join('') || infoCard('No deadlines here', 'There are no deadlines matching this view. Try another filter or add a personal demo deadline.');
+    }
+
+    function afterRender(name) {
+      if (name === 'notices') renderNoticeResults();
+      if (name === 'attendance') renderAttendanceRecords();
+      if (name === 'planner') renderPlannerSummary();
+    }
+
+    document.addEventListener('click', event => {
+      const control = event.target.closest('button, a');
+      if (!control) return;
+      if (control.dataset.view) {
+        event.preventDefault(); openView(control.dataset.view); return;
+      }
+      if (control.hasAttribute('data-close')) { closeView(); return; }
+      const action = control.dataset.action;
+      const id = control.dataset.id;
+      if (action === 'refresh-schedule') openSchedule(scheduleMode);
+      if (action === 'forgot-password') $('loginMessage').textContent = 'Password reset is a preview. No email has been sent; real recovery will be available when accounts launch.';
+      if (action === 'notice-category') {
+        noticeCategory = control.dataset.category;
+        document.querySelectorAll('[data-action="notice-category"]').forEach(chip => chip.setAttribute('aria-pressed', String(chip === control)));
+        renderNoticeResults();
+      }
+      if (action === 'notice-read') {
+        const notice = noticeRecords.find(record => record.id === id);
+        if (!notice) return;
+        notice.read = !notice.read; renderNoticeResults();
+        const next = document.querySelector(`[data-action="notice-read"][data-id="${id}"]`);
+        if (next) next.focus(); else $('noticeUnread').focus();
+      }
+      if (action === 'notice-reset') {
+        noticeCategory = 'All'; noticeQuery = ''; noticeUnread = false;
+        $('featureContent').innerHTML = renderNotices(); renderNoticeResults(); $('noticeSearch').focus();
+      }
+      if (action === 'attendance-retry') { $('attendanceScenario').value = 'records'; renderAttendanceRecords(); $('attendanceScenario').focus(); }
+      if (action === 'planner-remove') {
+        plannedTerms[plannerTerm] = plannedTerms[plannerTerm].filter(course => course !== id);
+        renderPlannerSummary(); $('plannerCourse').focus(); announce('Course removed from this demo semester.');
+      }
+      if (action === 'assistant-topic') {
+        const topic = control.dataset.topic;
+        const answers = {
+          schedule: ['Your personal schedule is not connected. You can browse public class sections.', 'class', 'Open public schedule'],
+          deadlines: ['The deadline page shows example university dates and any personal tasks you add during this visit.', 'deadlines', 'Open demo deadlines'],
+          degree: ['The degree preview shows 54 completed example credits out of 124. It is not an evaluation of your real academic record.', 'degree', 'Open degree preview']
+        };
+        const answer = answers[topic];
+        if (answer) $('assistantAnswer').innerHTML = `<article class="demo-card stack"><p>${answer[0]}</p><a class="action-button" href="#${answer[1]}" data-view="${answer[1]}">${answer[2]}</a><small class="muted">Source: FRIDAY prototype ${topic} page · example data</small></article>`;
+      }
+      if (action === 'deadline-form' || action === 'deadline-cancel') {
+        const show = action === 'deadline-form' && $('deadlineForm').hidden;
+        $('deadlineForm').hidden = !show;
+        const trigger = document.querySelector('[data-action="deadline-form"]');
+        trigger.setAttribute('aria-expanded', String(show));
+        (show ? $('deadlineName') : trigger).focus();
+      }
+      if (action === 'deadline-done' || action === 'deadline-remove') {
+        const index = deadlineRecords.findIndex(record => record.id === id && record.source === 'Personal');
+        if (index < 0) return;
+        if (action === 'deadline-done') deadlineRecords[index].done = !deadlineRecords[index].done;
+        else deadlineRecords.splice(index, 1);
+        renderDeadlineResults(); $('deadlineFilter').focus();
+        announce(action === 'deadline-remove' ? 'Personal demo deadline removed.' : 'Personal demo deadline updated.');
+      }
     });
-    deadlineClose.addEventListener('click', closePanels);
+
+    document.addEventListener('input', event => {
+      if (event.target.id === 'scheduleSearch' || event.target.id === 'facultySearch') {
+        if ($('schedulePanel').getAttribute('aria-busy') !== 'true') renderSchedule();
+      }
+      if (event.target.id === 'noticeSearch') { noticeQuery = event.target.value; renderNoticeResults(); }
+    });
+    document.addEventListener('change', event => {
+      if (event.target.id === 'noticeUnread') { noticeUnread = event.target.checked; renderNoticeResults(); }
+      if (event.target.id === 'attendanceScenario') renderAttendanceRecords();
+      if (event.target.id === 'plannerTerm') { plannerTerm = event.target.value; renderPlannerSummary(); }
+      if (event.target.id === 'deadlineFilter') { deadlineFilter = event.target.value; renderDeadlineResults(); }
+    });
+    document.addEventListener('submit', event => {
+      const form = event.target;
+      event.preventDefault();
+      if (form.id === 'loginForm') {
+        const email = $('loginEmail'); const password = $('loginPassword');
+        const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+        const validPassword = password.value.trim().length > 0;
+        $('emailError').textContent = validEmail ? '' : 'Enter a valid-looking email address.';
+        $('passwordError').textContent = validPassword ? '' : 'Enter a made-up password for the demo.';
+        email.setAttribute('aria-invalid', String(!validEmail)); password.setAttribute('aria-invalid', String(!validPassword));
+        if (!validEmail || !validPassword) { (!validEmail ? email : password).focus(); return; }
+        const submit = form.querySelector('[type="submit"]');
+        submit.disabled = true;
+        email.value = ''; password.value = '';
+        $('loginMessage').textContent = 'Demo complete. Returning to the portal…';
+        loginTimer = setTimeout(() => { closeView(); announce('Demo sign-in complete. No real account session was created.'); }, 450);
+      }
+      if (form.id === 'deadlineForm') {
+        const title = $('deadlineName').value.trim(); const due = $('deadlineDate').value;
+        const validTitle = title.length > 0 && title.length <= 120;
+        const validDue = /^\d{4}-\d{2}-\d{2}$/.test(due) && due >= localToday();
+        $('deadlineName').setAttribute('aria-invalid', String(!validTitle)); $('deadlineDate').setAttribute('aria-invalid', String(!validDue));
+        if (!validTitle || !validDue) {
+          $('deadlineError').textContent = !validTitle ? 'Enter a title with 1–120 characters.' : 'Choose today or a future date.';
+          (!validTitle ? $('deadlineName') : $('deadlineDate')).focus(); return;
+        }
+        deadlineRecords.push({ id: 'personal-' + (++personalDeadlineId), title, due, description: 'Added during this demo visit. Resets on reload.', source: 'Personal', done: false });
+        deadlineFilter = 'all'; renderDeadlines(); document.querySelector('[data-action="deadline-form"]').focus(); announce('Personal deadline added for this demo visit.');
+      }
+      if (form.id === 'plannerAdd') {
+        const id = $('plannerCourse').value;
+        if (!Object.hasOwn(plannerCourses, id) || plannedTerms[plannerTerm].includes(id)) return;
+        plannedTerms[plannerTerm].push(id); renderPlannerSummary(); announce('Example course added. Your real registration is unchanged.');
+      }
+      if (form.id === 'registrationForm') {
+        const term = $('registrationTerm').value;
+        const early = $('avoidEarly').checked;
+        const compact = $('compactWeek').checked;
+        const submit = form.querySelector('[type="submit"]'); submit.disabled = true;
+        $('registrationResult').setAttribute('aria-busy', 'true');
+        $('registrationResult').innerHTML = infoCard('Preparing example plan…', 'Applying your selections to this fixed preview.');
+        registrationTimer = setTimeout(() => {
+          submit.disabled = false; $('registrationResult').setAttribute('aria-busy', 'false');
+          if (term === 'Spring 2027') {
+            $('registrationResult').innerHTML = infoCard('No example sections for this term', 'Try Autumn 2026. Live plan generation is not connected in this prototype.'); return;
+          }
+          $('registrationResult').innerHTML = `<article class="demo-card stack"><span class="status-chip">◌ Example result · ${term}</span><h3>9-credit preview</h3><p>CSE220 · Data structures<br>MAT215 · Mathematics III<br>ENG102 · Composition</p><p>${early ? 'Start time preference: after 9 am.' : 'Early classes allowed in this preview.'} ${compact ? 'Campus-day preference: fewer days.' : 'Campus days: no preference.'}</p><div class="demo-banner warning">⚠ Example conflict: CSE220 lab and MAT215 tutorial overlap on Tuesday, 2:00–3:00 pm. Choose another section before registration.</div><p>Preferences are displayed for illustration. Prerequisites, seats, and actual section availability have not been checked.</p><a class="action-button" href="#class" data-view="class">Review public sections</a><p class="muted">Register only through your official university portal.</p></article>`;
+        }, 450);
+      }
+    });
+    let personalDeadlineId = 0;
     schedulesButton.addEventListener('click', () => {
-      const isOpen = scheduleChoices.classList.toggle('open');
-      schedulesButton.setAttribute('aria-expanded', String(isOpen));
+      const expanded = scheduleChoices.classList.toggle('open');
+      schedulesButton.setAttribute('aria-expanded', String(expanded));
     });
-    document.querySelectorAll('.sub-button').forEach(button => button.addEventListener('click', () => {
-      closePanels();
-      openSchedule(button.textContent.trim().toLowerCase());
-    }));
-    document.getElementById('scheduleClose').addEventListener('click', closePanels);
-    [scheduleSearch, facultySearch].forEach(control => control.addEventListener('input', renderSchedule));
-
-    // Sidebar collapse toggle
-    const sidebar = document.getElementById('portalSidebar');
-    const toggleBtn = document.getElementById('sidebarToggle');
     toggleBtn.addEventListener('click', () => {
-      const isCollapsed = sidebar.classList.toggle('collapsed');
-      toggleBtn.setAttribute('aria-expanded', !isCollapsed);
+      const collapsed = sidebar.classList.toggle('collapsed');
+      toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+      toggleBtn.setAttribute('aria-label', collapsed ? 'Expand panel' : 'Collapse panel');
+      // Pointer users can leave the temporary hover expansion after clicking.
+      if (eventPointerToggle) toggleBtn.blur();
     });
-
-    // Theme toggle (Dark / Light)
-    const html = document.documentElement;
-    const themeBtn = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-
-    const sunIcon = `<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>`;
-    const moonIcon = `<path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8A9.03 9.03 0 0 0 12 3z"/>`;
-
-    themeBtn.addEventListener('click', () => {
-      const current = html.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      themeIcon.innerHTML = next === 'dark' ? moonIcon : sunIcon;
+    let eventPointerToggle = false;
+    toggleBtn.addEventListener('pointerdown', () => { eventPointerToggle = true; });
+    toggleBtn.addEventListener('keydown', () => { eventPointerToggle = false; });
+    const sunIcon = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
+    const moonIcon = '<path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8A9.03 9.03 0 0 0 12 3z"/>';
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      $('themeIcon').innerHTML = theme === 'dark' ? moonIcon : sunIcon;
+      themeBtn.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`);
+    }
+    applyTheme(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    themeBtn.addEventListener('click', () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && activeView !== 'landing') { event.preventDefault(); closeView(); }
     });
+    document.querySelector('.skip-link').addEventListener('click', event => {
+      event.preventDefault();
+      (activeView === 'landing' ? main : activeView === 'deadlines' ? $('deadlineTitle') : ['class', 'exam'].includes(activeView) ? $('scheduleTitle') : $('featureTitle')).focus();
+    });
+    const restoreRoute = () => {
+      const name = routeFromHash();
+      if (name !== activeView) openView(name, { history: false });
+    };
+    window.addEventListener('popstate', restoreRoute);
+    window.addEventListener('hashchange', restoreRoute);
+    openView(routeFromHash(), { history: false, focus: false });
   </script>
 </body>
 </html>

@@ -1,0 +1,34 @@
+{
+  "name": "friday",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node apps/web/node_modules/next/dist/bin/next dev apps/web --hostname 127.0.0.1",
+    "build": "turbo run build",
+    "start": "node apps/web/node_modules/next/dist/bin/next start apps/web --hostname 127.0.0.1",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "db:prepare": "node scripts/prepare-supabase.mjs",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,css,json}\" \"packages/**/*.{ts,json}\" \"scripts/*.mjs\" \"tests/**/*.ts\" \"*.{json,mjs,ts,yaml}\" \".github/workflows/*.yml\"",
+    "format:check": "prettier --check \"apps/**/*.{ts,tsx,css,json}\" \"packages/**/*.{ts,json}\" \"scripts/*.mjs\" \"tests/**/*.ts\" \"*.{json,mjs,ts,yaml}\" \".github/workflows/*.yml\""
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.4.5",
+    "prettier": "^3.0.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.0.0"
+  }
+}

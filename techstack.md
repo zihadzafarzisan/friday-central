@@ -4,6 +4,8 @@
 **Date:** October 21, 2026
 **Guiding principles:** ship the MVP fast with a small team, keep one language (TypeScript) where possible, use managed services to avoid ops work, and stay tenant-aware so multi-university support is possible later.
 
+**Implementation update — November 8, 2026:** The approved migration uses Next.js 16, React 19, Supabase PostgreSQL/Auth, and SQL migrations rather than an ORM migration system. The application and all page previews are scaffolded. Supabase owns credentials and sessions; older Auth.js/custom-password assumptions below are superseded. Jobs, email, and AI providers remain open. See [the implementation decisions](docs/decisions/2026-11-08-production-implementation.md).
+
 ---
 
 ## 1. Summary
@@ -12,13 +14,13 @@
 |---|---|---|
 | Language | TypeScript (everywhere), Python only for the schedule solver if needed | One language across frontend, backend, and shared validation |
 | Frontend | Next.js (App Router) + React | SSR/SPA hybrid, file-based routing, great DX, easy deploy |
-| UI | Tailwind CSS + shadcn/ui + Radix | Accessible components (WCAG AA), fast to build, fully customizable |
-| Forms/validation | React Hook Form + Zod | Same Zod schemas on client and server (PRD FR-3.1) |
-| Data fetching | TanStack Query | Caching, loading/error states, filter-in-URL patterns |
+| UI | Shared React components, migrated prototype CSS, Lucide | Preserve the approved design; Tailwind/shadcn are not installed |
+| Forms/validation | Native React forms, server actions, Zod | Shared schemas and authoritative server validation |
+| Data fetching | Server-side Supabase services; fetch for public schedules | Role-scoped records, URL filters, refresh/error states; TanStack Query is not installed |
 | Backend | Next.js Route Handlers / Server Actions for MVP; NestJS service when logic outgrows it | Fewer moving parts at launch, clean path to a separate API |
-| Database | PostgreSQL (Neon or Supabase) | Relational data (courses, prerequisites, sections) fits perfectly; built-in full-text search |
-| ORM | Prisma (or Drizzle) | Type-safe queries, migrations |
-| Auth | Auth.js (NextAuth) or Supabase Auth | Email verification, sessions, RBAC; separate student/admin roles |
+| Database | Supabase PostgreSQL | Relational data and database-enforced tenant/owner isolation |
+| Data access / migrations | Authenticated Supabase client, Zod validation, versioned SQL migrations | One migration owner; RLS policies tested with PostgreSQL |
+| Auth | Supabase Auth | Email verification, recovery, SSR cookie sessions; separate student/admin login pages |
 | Background jobs | Inngest (or BullMQ + Redis) | Reminder scheduling, notice processing, retries |
 | Email | Resend (or Amazon SES) | Verification, reset, reminders, digests |
 | AI | LLM(Will decide later) API (structured outputs / tool use) | Notice classification, date extraction, grounded assistant |

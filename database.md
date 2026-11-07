@@ -2,8 +2,10 @@
 
 **Companion to:** `prd.md`, `tech-stack.md`, `app-flow.md`, `design-guide.md`
 **Date:** October 21, 2026
-**Database:** PostgreSQL (Neon or Supabase), accessed through Prisma
+**Database:** Supabase PostgreSQL; versioned SQL migrations own the implemented schema
 **Purpose:** Define what data FRIDAY saves, why, and how every table connects.
+
+**Implementation update — November 8, 2026:** `packages/db/migrations` is the executable source of truth for the current subset. Supabase Auth owns passwords, verification tokens, and sessions; application `users.id` references `auth.users`. Do not implement the earlier application password/session tables below. The initial implementation uses validated JSON meetings on sections and immutable JSON plan items written only through an ownership/eligibility-checking RPC. Full requirement-group matching, notice audience targeting, scheduled reminders, and assistant history remain future schema work. See [the implementation decisions](docs/decisions/2026-11-08-production-implementation.md).
 
 ---
 

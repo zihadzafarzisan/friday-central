@@ -4,6 +4,8 @@
 **Date:** October 21, 2026
 **Purpose:** Describe every screen, route, and journey in the student and admin portals, including transitions and UI states.
 
+**Implementation update — November 8, 2026:** The Next.js app implements these route areas plus explicit public `/preview` and `/preview/admin` routes for sample-data review. `/schedules` and `/exams` expose validated public Connect listings; `/app/schedule` shows manually selected personal enrollments. The first pilot uses BRACU student email and Supabase Auth. Real account/email acceptance testing awaits a connected project. Some richer flows below remain planned; see [production status](docs/production-status.md).
+
 ---
 
 ## 1. App Map

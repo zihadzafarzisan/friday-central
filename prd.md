@@ -5,6 +5,8 @@
 **Date:** October 21, 2026
 **Platform:** Responsive web application (student portal + admin portal)
 
+**Pilot update — November 8, 2026:** BRAC University (BRACU) is the initial pilot; other universities are deferred. Keep university configuration and tenant isolation reusable. The approved implementation uses Supabase PostgreSQL/Auth, `g.bracu.ac.bd` student email, and `Asia/Dhaka`; see [the implementation decisions](docs/decisions/2026-11-08-production-implementation.md). Hosted setup and authoritative catalog access remain outstanding.
+
 ---
 
 ## 1. Product Overview
@@ -350,7 +352,7 @@ Applies to: signup, profile, add deadline, add course attendance, admin course/s
 ---
 
 ## 9. Open Questions
-1. Which university (or universities) is the pilot, and what data access exists?
+1. Pilot university resolved: BRAC University initially; other universities later. Authoritative catalog access and personal enrollment integration remain open.
 2. Will students self-report completed courses, or will transcript import be required for MVP?
 3. Should admins be university staff, FRIDAY operators, or both?
 4. What is the expected scale (students per university) at launch?

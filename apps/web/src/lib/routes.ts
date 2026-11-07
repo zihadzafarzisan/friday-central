@@ -1,0 +1,28 @@
+export const studentTitles: Record<string, string> = {
+  "": "Your day, in focus",
+  schedule: "Your schedule",
+  deadlines: "Deadlines",
+  notices: "Notice board",
+  degree: "Degree progress",
+  registration: "Registration Copilot",
+  planner: "Semester planner",
+  attendance: "Attendance",
+  assistant: "University assistant",
+  notifications: "Notifications",
+  profile: "Your profile",
+  settings: "Settings",
+  onboarding: "Let’s get you set up",
+};
+export const adminTitles: Record<string, string> = {
+  "": "University overview",
+  users: "Users",
+  "catalog/programs": "Programs and degree rules",
+  "catalog/courses": "Courses",
+  "catalog/sections": "Sections",
+  "catalog/import": "Catalog import",
+  notices: "Manage notices",
+  deadlines: "University deadlines",
+  reports: "Reports",
+  "audit-log": "Audit log",
+  settings: "University settings",
+};

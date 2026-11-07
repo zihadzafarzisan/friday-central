@@ -6,7 +6,7 @@
 **Plan created:** October 21, 2026
 **Current release target:** MVP / Release 1
 **Current phase:** Phase 0 — Foundation
-**Overall status:** Planning complete; implementation not started
+**Overall status:** All-page Next.js migration implemented and locally verified; hosted Supabase setup pending
 **Primary specification:** `prd.md`
 **Supporting documents:** `techstack.md`, `app-flow.md`, `database.md`, `design-guide.md`
 
@@ -16,12 +16,12 @@
 
 | Field | Value |
 |---|---|
-| Last task completed | Made the FRIDAY watermark global across all portal pages |
-| Completed date | October 23, 2026 |
-| Current next task | Scaffold the application and move schedule ingestion behind a validated server-side service |
+| Last task completed | Migrated student/admin pages to Next.js and implemented the Supabase integration |
+| Completed date | November 8, 2026 |
+| Current next task | Connect the hosted Supabase project, apply migrations, and verify real student/admin flows |
 | Current owner | Project team |
-| Status | In progress |
-| Notes | The watermark is now one fixed portal-shell layer, so current and future in-portal views inherit the same stationary treatment automatically. |
+| Status | Local migration done; hosted integration pending |
+| Notes | Student/admin routes, shared React UI, server actions, SQL migrations/RLS, domain tools, CI definition, and local tests are implemented. See docs/production-status.md for exact coverage and remaining release work. |
 
 ### Task update format
 
@@ -105,29 +105,31 @@ Dates are initial working targets beginning October 21, 2026. Adjust them in thi
 
 ### P0-T01: Confirm product decisions
 
-**Status:** Ready
+**Status:** In progress
 **Planned dates:** October 21–22, 2026
 **Dependencies:** None
 
-- [ ] Confirm pilot university, email domain, timezone, and expected student scale.
-- [ ] Decide whether completed courses are manually entered for MVP.
-- [ ] Decide whether enrollment data is manually entered or imported.
-- [ ] Decide whether grades are required for MVP or only completion status.
+- [x] Confirm pilot university: BRAC University (BRACU) initially; other universities later.
+- [x] Set initial domain `g.bracu.ac.bd` and timezone `Asia/Dhaka` in tenant configuration.
+- [ ] Confirm expected launch cohort size.
+- [x] Use manually selected completed courses for the first release.
+- [x] Use manually selected enrollments initially; public Connect listings remain separate.
+- [x] Keep grades optional; earned credits count completed courses.
 - [ ] Decide whether admin 2FA is required at launch.
-- [ ] Decide the official university portal URL used by Registration Copilot handoff.
+- [x] Link the handoff to `https://connect.bracu.ac.bd`; FRIDAY never submits registration.
 - [ ] Update the open questions in `prd.md`, `app-flow.md`, and `database.md` with decisions.
 
 **Deliverable:** Approved decision record and no unresolved blocker for foundation implementation.
 
 ### P0-T02: Lock initial technology providers
 
-**Status:** Ready
+**Status:** In progress
 **Planned dates:** October 21–22, 2026
 **Dependencies:** P0-T01
 
-- [ ] Choose Neon or Supabase for PostgreSQL hosting.
-- [ ] Choose Prisma or Drizzle for the ORM; the current plan assumes Prisma.
-- [ ] Choose Auth.js or Supabase Auth; the current plan assumes Auth.js.
+- [x] Select Supabase PostgreSQL for the approved implementation.
+- [x] Use Supabase client access and versioned SQL migrations; no competing ORM schema owner.
+- [x] Select Supabase Auth; credentials, verification tokens, and provider sessions are not stored in application-owned auth tables.
 - [ ] Choose Inngest or BullMQ; the current plan assumes Inngest for the MVP.
 - [ ] Choose email provider; the current plan assumes Resend.
 - [ ] Choose the AI provider and model only after security, data handling, cost, and structured-output requirements are reviewed. `techstack.md` currently leaves this decision open.
@@ -137,9 +139,12 @@ Dates are initial working targets beginning October 21, 2026. Adjust them in thi
 
 ### P0-T03: Scaffold the monorepo and web application
 
-**Status:** In progress
+**Status:** Done
+**Started/completed:** November 8, 2026
 **Planned dates:** October 23–24, 2026
 **Dependencies:** P0-T02
+
+**Milestone note:** The original HTML prototype remains available. The production workspace and full React route shell are now implemented. Hosted services and release hardening remain separate. Git hooks are deferred in favor of the configured CI checks; the optional Python solver service is not created because the TypeScript solver is sufficient for this milestone.
 
 **Expected structure:**
 
@@ -153,34 +158,36 @@ services/solver-py/
 docs/
 ```
 
-- [ ] Create a pnpm + Turborepo workspace.
-- [ ] Create the Next.js App Router application in `apps/web`.
-- [ ] Configure TypeScript, ESLint, Prettier, Husky, and lint-staged.
-- [ ] Add `/app` and `/admin` route groups with placeholder layouts.
-- [ ] Add shared package boundaries for database, schemas, and solver logic.
-- [ ] Add environment validation with typed Zod schemas.
-- [ ] Add a health endpoint and a minimal landing page.
+- [x] Create a pnpm + Turborepo workspace.
+- [x] Create the Next.js App Router application in `apps/web`.
+- [x] Configure TypeScript, ESLint, and Prettier; defer Husky/lint-staged hooks.
+- [x] Add protected `/app` and `/admin` route groups and all-page public previews.
+- [x] Add shared package boundaries for database, schemas, and solver logic.
+- [x] Add environment validation with typed Zod schemas.
+- [x] Add a health endpoint and migrate the landing page.
 
 **Verification:** Local development server starts; typecheck, lint, test, and production build pass.
 
 ### P0-T04: Establish CI and deployment environments
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** October 25–27, 2026
 **Dependencies:** P0-T03
 
-- [ ] Add GitHub Actions for install, lint, typecheck, tests, and build.
+- [x] Add GitHub Actions for install, lint, typecheck, tests, build, and browser verification.
 - [ ] Configure `local`, `preview`, `staging`, and `production` environment conventions.
 - [ ] Connect the web application to Vercel or the selected hosting provider.
-- [ ] Configure secrets only through environment variables.
+- [x] Add ignored local environment configuration and a non-secret example; no elevated app key.
 - [ ] Add Sentry and basic structured logging.
-- [ ] Add a deployment health check.
+- [x] Add `/api/health` for deployment readiness checks.
 
 **Verification:** A pull request produces a preview deployment and CI blocks failures.
 
 ### P0-T05: Implement database foundation and migrations
 
-**Status:** Not started
+**Status:** In progress
+
+**Implemented subset:** Supabase SQL migrations, identity/profile trigger, catalog/prerequisite records, sections/meetings, student records, deadlines/notices, plans, preferences, notifications, audit, and RLS are prepared and PostgreSQL-tested. Supabase owns sessions/tokens. Detailed requirement-group tables, instructors/exam ingestion, and hosted application remain pending; see `docs/production-status.md`.
 **Planned dates:** October 28–November 3, 2026
 **Dependencies:** P0-T02, P0-T03
 
@@ -203,10 +210,10 @@ docs/
 - `exams`
 - `student_profiles`
 
-- [ ] Implement the Prisma schema from `database.md`.
+- [x] Implement the selected Supabase SQL schema subset; Prisma is superseded.
 - [ ] Add UUID identifiers, timestamps, tenant keys, relations, indexes, and delete behavior.
-- [ ] Add constraints for credits, capacity, seats, time ordering, and personal deadline ownership where applicable.
-- [ ] Add initial migrations and a repeatable seed script.
+- [x] Add constraints for credits, capacity, seats, time ordering, and personal deadline ownership.
+- [x] Add initial migrations and a repeatable sample seed script.
 - [ ] Seed one university, program, courses, prerequisites, semester, instructors, sections, and super-admin placeholder.
 
 **Verification:** Migration applies to an empty database; seed is repeatable; relational integrity tests pass.
@@ -217,7 +224,7 @@ docs/
 
 ### P0-T06: Build authentication and session controls
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** November 4–7, 2026
 **Dependencies:** P0-T05
 
@@ -235,7 +242,7 @@ docs/
 
 ### P0-T07: Add route guards and role-based policies
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** November 7–8, 2026
 **Dependencies:** P0-T06
 
@@ -250,7 +257,7 @@ docs/
 
 ### P0-T08: Build onboarding and student profile
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** November 8–10, 2026
 **Dependencies:** P0-T05, P0-T07
 
@@ -265,7 +272,7 @@ docs/
 
 ### P0-T09: Build admin catalog management
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** November 11–17, 2026
 **Dependencies:** P0-T05, P0-T07
 
@@ -285,7 +292,7 @@ docs/
 
 ### P1-T01: Build the application shell and design system
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** November 11–14, 2026
 **Dependencies:** P0-T03
 
@@ -300,7 +307,7 @@ docs/
 
 ### P1-T02: Build dashboard and schedule
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** November 15–21, 2026
 **Dependencies:** P0-T08, P0-T09, P1-T01
 
@@ -315,7 +322,7 @@ docs/
 
 ### P1-T03: Build the unified deadline manager
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** November 22–27, 2026
 **Dependencies:** P0-T05, P1-T01
 
@@ -331,7 +338,7 @@ docs/
 
 ### P1-T04: Build notice board and notice detail
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** November 28–December 4, 2026
 **Dependencies:** P0-T09, P1-T01
 
@@ -361,7 +368,7 @@ docs/
 
 ### P1-T06: Build degree progress tracking
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** December 9–12, 2026
 **Dependencies:** P0-T08, P0-T09
 
@@ -380,7 +387,7 @@ docs/
 
 ### P1-T07: Implement notification pipeline
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** December 13–17, 2026
 **Dependencies:** P1-T03, P1-T04, P1-T05, P0-T02
 
@@ -397,7 +404,7 @@ docs/
 
 ### P1-T08: Complete admin user, deadline, reports, and audit screens
 
-**Status:** Not started
+**Status:** In progress
 **Planned dates:** December 18–22, 2026
 **Dependencies:** P0-T07, P1-T07
 
@@ -464,7 +471,7 @@ docs/
 
 ### P2-T01: Registration Copilot MVP
 
-**Status:** Deferred
+**Status:** In progress
 **Planned dates:** January 13–23, 2027
 **Dependencies:** P0-T09, P1-T10
 
@@ -479,7 +486,7 @@ docs/
 
 ### P2-T02: Attendance tracker
 
-**Status:** Deferred
+**Status:** In progress
 **Planned dates:** January 24–30, 2027
 **Dependencies:** P1-T02, P0-T05
 
@@ -491,7 +498,7 @@ docs/
 
 ### P2-T03: Grounded AI University Assistant
 
-**Status:** Deferred
+**Status:** In progress
 **Planned dates:** January 31–February 9, 2027
 **Dependencies:** P1-T02, P1-T03, P1-T06, P2-T01, P2-T02, P0-T02
 
@@ -600,17 +607,17 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Decision | Current state | Required before | Owner | Status |
 |---|---|---|---|---|
-| Pilot university and email domain | Unknown | Authentication and seed data | Project team | Blocked |
-| University data access | Unknown | Catalog import and schedule | Project team | Blocked |
+| Pilot university and email domain | BRAC University; `g.bracu.ac.bd`; Asia/Dhaka | Authentication and seed data | Project team | Selected |
+| University data access | Public Connect JSON browser implemented; authoritative catalog/import and student enrollment source unconfirmed | Production catalog import and personal schedule | Project team | Ready to decide |
 | AI provider and model | `techstack.md` says “LLM (Will decide later) API” | Notice intelligence and assistant | Project team | Blocked |
-| Database host | Neon or Supabase | Database deployment | Project team | Ready to decide |
-| ORM | Prisma or Drizzle; plan assumes Prisma | Schema implementation | Project team | Ready to decide |
-| Auth provider | Auth.js or Supabase Auth; plan assumes Auth.js | Authentication | Project team | Ready to decide |
+| Database host | Supabase PostgreSQL; integration/project not connected yet | Hosted database verification | Project team | Selected; setup pending |
+| Schema owner | Supabase versioned SQL migrations and authenticated client | Schema implementation | Project team | Selected |
+| Auth provider | Supabase Auth; SSR integration implemented | Hosted account/verification/recovery checks | Project team | Selected; setup pending |
 | Queue provider | Inngest or BullMQ; plan assumes Inngest | Reminders and notification jobs | Project team | Ready to decide |
-| Completed-course entry | Manual entry assumed for MVP | Onboarding | Project team | Ready to decide |
-| Enrollment source | Manual or official sync | Dashboard and schedule | Project team | Ready to decide |
+| Completed-course entry | Manual catalog selection | Onboarding | Project team | Selected |
+| Enrollment source | Manual catalog selection; authoritative import remains open | Dashboard and schedule | Project team | Initial source selected |
 | Admin 2FA | Open question | Pilot security review | Project team | Open |
-| Grades in MVP | Open question | Degree and CGPA scope | Project team | Open |
+| Grades in MVP | Optional; completed status drives earned credits | Degree and CGPA scope | Project team | Selected |
 
 ---
 
@@ -621,6 +628,9 @@ The MVP can be released to a pilot only when all of the following are true:
 | October 21, 2026 | Read `prd.md`, `techstack.md`, `app-flow.md`, `database.md`, and `design-guide.md` | Requirements, routes, data model, stack, design, security, and release phases mapped | Confirm decisions in P0-T01 and P0-T02 |
 | October 21, 2026 | Created `buildplan.md` | Full project plan and tracking structure created | Start P0-T01 |
 | October 23, 2026 | Schedule prototype integration | Added Class and Exam views with course/faculty/semester filters backed by the public Connect JSON dataset | Scaffold the server-side application integration |
+| November 8, 2026 | Completed frontend prototype | All original navigation and profile actions work; added demo student pages, temporary planner/deadline actions, shared history/focus handling, mobile navigation, safe schedule rendering, and browser smoke coverage | Confirm production decisions and scaffold Next.js |
+| November 8, 2026 | Recorded pilot/backend direction | User confirmed BRACU first and other universities later; Supabase recorded as a tentative preference; student domain researched against official BRACU material | Finalize signup policy and provider direction, then scaffold production |
+| November 8, 2026 | Next.js/Supabase migration | Migrated all public/student/admin pages; implemented validated services, SQL/RLS, core academic tools, auth scaffolding, transactional notifications/imports, CI, and local verification | Connect Supabase and verify real accounts, migrations, and saved records |
 
 ---
 
@@ -630,6 +640,9 @@ The MVP can be released to a pilot only when all of the following are true:
 |---|---|---|
 | October 21, 2026 | Initial build plan created | Consolidated the current PRD, tech stack, app flow, database, and design documents |
 | October 23, 2026 | Added public schedule data prototype | Class and exam navigation now display Connect course, timetable, faculty, room, seat, and exam data |
+| November 8, 2026 | Completed the frontend-only milestone; added README/browser smoke suite; corrected stale repository/scaffold status | Distinguish the usable prototype from production work that has not started; preserve existing visual identity and schedule source |
+| November 8, 2026 | Added pilot/backend decision record and updated PRD, stack, and repository guidance | Record confirmed BRACU scope separately from tentative Supabase and signup-policy decisions |
+| November 8, 2026 | Implemented the approved production migration; retained explicit previews and original HTML | All pages must survive migration; local checks do not imply a deployed or pilot-ready backend |
 
 ---
 

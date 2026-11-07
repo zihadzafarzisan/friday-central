@@ -1,0 +1,9 @@
+node_modules
+.tools
+.cache
+.next
+.turbo
+pnpm-lock.yaml
+frontend
+.superpowers
+.claude

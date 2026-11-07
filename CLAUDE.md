@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-This repository is currently specification-only. The implementation has not been scaffolded yet. The primary product and engineering references are:
+This repository contains a pnpm/Turborepo Next.js application in `apps/web`, shared schemas/domain logic, Supabase SQL migrations, and the preserved HTML prototype in `frontend/index.html`. Every student/admin page has a React route and an explicit public preview. Supabase-backed services and auth flows are implemented but have not been applied or verified against a hosted project. The primary product and engineering references are:
 
 - `prd.md` — product vision, MVP scope, functional requirements, roles, security, and release boundaries.
 - `techstack.md` — intended TypeScript/Next.js architecture, provider choices under consideration, service boundaries, AI approach, testing, and deployment direction.
@@ -13,11 +13,13 @@ This repository is currently specification-only. The implementation has not been
 - `design-guide.md` — glassmorphism design system, accessibility, responsive behavior, and performance constraints.
 - `buildplan.md` — implementation sequence, task status, verification criteria, open decisions, and progress tracking. Keep this file current as work advances.
 
-There is currently no `README.md`, package manifest, source tree, test suite, CI configuration, Cursor rule, or Copilot instruction file. Do not assume development commands exist until the monorepo is created.
+`README.md` documents installation, preview, database setup, and verification. `docs/decisions/2026-11-08-production-implementation.md` records the selected Supabase architecture and overrides older Prisma/Auth.js assumptions. Do not mark hosted authentication or database deployment complete based only on local checks.
 
 ## Commands
 
-No verified build, development, lint, typecheck, or test commands are available yet because the project has not been scaffolded. Do not run guessed `npm`, `pnpm`, Next.js, Prisma, or test commands as if they were configured.
+For the buildless prototype, open `frontend/index.html` directly or serve it with `python -m http.server 8080 --bind 127.0.0.1 --directory frontend`. The browser smoke suite runs with `node frontend/tests/smoke.cjs` when Playwright and Chromium are available. `PLAYWRIGHT_MODULE` may identify an existing Playwright installation. The suite owns its temporary server and mocks the schedule feed. See `README.md` for details.
+
+Configured workspace commands: `pnpm dev`, `pnpm build`, `pnpm start`, `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:e2e`, and `pnpm db:prepare`. Node.js 22+ and pnpm 12.18.0 are required. Browser tests use the production build, so run `pnpm build` first. `BROWSER_EXECUTABLE` can select an installed Chromium. Unit/database tests use PGlite and do not need Docker. `pnpm db:prepare` stages versioned SQL files for the Supabase CLI; it does not apply them to any database.
 
 The planned implementation is a pnpm + Turborepo TypeScript monorepo. Once P0-T03 is complete, update this section with the actual scripts from the root and package manifests, including:
 
@@ -50,7 +52,7 @@ Role checks must exist both at route/middleware boundaries and in the service la
 The intended repository boundaries are:
 
 - `apps/web` — Next.js UI, route groups, layouts, route handlers/server actions, and server composition.
-- `packages/db` — Prisma schema, migrations, seed data, and database access types.
+- `packages/db` — Supabase SQL migrations, repeatable sample seed, preview fixtures, and PostgreSQL policy tests. Supabase migrations own the schema; do not add a competing ORM migration system.
 - `packages/schemas` — shared Zod schemas used at client and server boundaries.
 - `packages/solver` — pure TypeScript registration/prerequisite logic, independently testable.
 - `services/solver-py` — optional Phase 2 Python/OR-Tools service only if TypeScript solving no longer meets requirements.
@@ -74,7 +76,7 @@ Use Zod at request, form, import, and AI-output boundaries. Server validation is
 
 ### Data model and tenancy
 
-PostgreSQL is the intended database, accessed through Prisma unless the provider decision changes. University-shared data includes programs, courses, prerequisites, semesters, sections, notices, and university deadlines. Student-private data includes profiles, completed courses, enrollments, personal deadlines, attendance, saved plans, and preferences. System data includes notifications, AI extraction records, reminders, assistant records, imports, sessions, and audit logs.
+PostgreSQL is hosted by Supabase and accessed with the authenticated user's Supabase client. Supabase Auth owns credentials and provider sessions. University-shared data includes programs, courses, prerequisites, semesters, sections, notices, and university deadlines. Student-private data includes profiles, completed courses, enrollments, personal deadlines, attendance, saved plans, and preferences. The implemented subset and remaining pipelines are recorded in `buildplan.md`; the older database document also describes future tables.
 
 University-scoped tables must carry `university_id`, and every query must enforce tenant filtering. The core relationships are:
 
@@ -95,7 +97,7 @@ The planned background jobs cover deadline reminders, notice processing, schedul
 
 ### UI and interaction system
 
-The intended frontend uses Tailwind CSS, shadcn/ui, Radix primitives, React Hook Form, Zod, and TanStack Query. Use the design system in `design-guide.md` rather than introducing ad hoc visual styles:
+The current frontend preserves the prototype CSS in `globals.css` with shared React components and Lucide icons. Native React forms and server actions use shared Zod schemas. Tailwind, shadcn, React Hook Form, and TanStack Query were considered in the original plan but are not installed; do not assume their utilities exist. Follow `design-guide.md` and preserve the approved visual identity:
 
 - Glass levels G1/G2/G3/G-Solid establish elevation and opacity.
 - Text-heavy surfaces use solid/high-opacity treatment for readability.
@@ -106,19 +108,21 @@ The intended frontend uses Tailwind CSS, shadcn/ui, Radix primitives, React Hook
 
 ### Testing direction
 
-The written plan calls for Vitest unit tests around pure domain logic (solver, prerequisites, degree progress, attendance, deadline status), Testing Library component tests for forms and UI states, and Playwright critical-path tests. Accessibility checks should use axe, and CI should eventually run install, lint, typecheck, tests, and build. These tools are planned, not installed or configured yet.
+Vitest domain/schema tests, PGlite PostgreSQL migration/policy tests, Playwright browser flows, and a CI definition are configured. Testing Library, axe, and Storybook remain planned rather than installed. Do not claim a full accessibility audit, hosted CI run, or real Supabase acceptance test from these local checks.
 
 ## Current implementation sequence
 
 Follow `buildplan.md` as the source of truth for sequencing and status. The next foundation work is:
 
-1. Resolve product decisions: pilot university/domain, data access, completed-course and enrollment sources, grades, admin 2FA, and official portal handoff.
-2. Lock providers: database host, ORM, auth, queue, email, and AI model/provider.
-3. Scaffold the pnpm/Turborepo monorepo and minimal Next.js app.
-4. Establish CI/deployment conventions and then implement database migrations/seeds.
+1. Connect the selected Supabase project and apply/verify the prepared SQL migrations.
+2. Verify real signup, email confirmation, recovery, role/onboarding redirects, and saved student/admin records.
+3. Replace sample catalog/degree data with authoritative university data and confirm launch policies.
+4. Complete reminder/email/AI pipelines, monitoring, deployment, and the remaining release checks.
 
 When starting or completing meaningful work, update the task status, Last Task section, progress log, open blockers, and change log in `buildplan.md` according to its maintenance rules.
 
 ## Important unresolved decisions
 
-Do not silently treat these as settled product requirements: pilot university and email domain, available university data source, AI provider/model, Neon versus Supabase, Prisma versus Drizzle, Auth.js versus Supabase Auth, Inngest versus BullMQ, manual versus imported completed courses/enrollments, admin 2FA, and whether grades are required in MVP. If implementation depends on one, record the decision and its rationale in the appropriate specification before proceeding.
+BRAC University is the initial pilot; other universities come later. The approved implementation uses Supabase PostgreSQL/Auth, student domain `g.bracu.ac.bd`, and timezone `Asia/Dhaka`. Domain/tenant settings are stored in the database. See `docs/decisions/2026-11-08-production-implementation.md`. Launch cohort size, authoritative catalog/degree rules, and hosted Supabase setup remain open.
+
+Unresolved release decisions include authoritative university data access, AI provider/model, scheduled job/email providers, production admin 2FA/session/lockout configuration, and pilot scale. Completed courses/enrollments use manual entry initially; grades are optional. Preserve route and service authorization plus database RLS. Never use user-editable metadata for roles or grant browser code an elevated Supabase key. Preview routes must remain separate from authenticated routes.

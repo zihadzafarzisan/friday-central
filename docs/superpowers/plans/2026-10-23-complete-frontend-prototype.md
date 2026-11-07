@@ -10,6 +10,16 @@
 
 **Spec:** `prd.md`, `app-flow.md`, `design-guide.md`, `techstack.md`, `CLAUDE.md`
 
+**Status:** Frontend milestone completed November 8, 2026.
+
+**Implementation notes:** Added a shared route registry and panel lifecycle, history/focus restoration, all planned demo pages, guided assistant and informational pages for previously inert controls, temporary planner/deadline interactions, global theme/profile controls, and mobile bottom navigation. Existing branding, transparent desktop sidebar, fixed watermark, and public Connect schedule source are retained. Schedule content is escaped, malformed records are handled, and failed refreshes preserve previously fetched records.
+
+**Verification:** `frontend/tests/smoke.cjs` passed 16 browser scenarios using an existing Playwright Core 1.63.0/Chromium installation. The suite checks every original navigation control, route isolation and history, focus/keyboard behavior, login validation, notice filters, attendance states, degree totals, planner actions, registration preview states, deadline validation/completion/removal, schedule sorting/filtering/error/retry behavior, HTML escaping, and every route at 1440px and 360px in both themes. Reduced-motion behavior and a 720px narrow-layout check also passed. Desktop/mobile screenshots were reviewed. Inline JavaScript syntax, duplicate static HTML IDs, test-script syntax, and `git diff --check` passed.
+
+**Verification limits:** Schedule requests are mocked in the browser suite; current live CDN availability and data correctness are not verified. This is not a full WCAG audit, a physical-device test, or a browser-native 200% zoom test. No production build, database, authentication, email, AI, or CI verification is possible before those systems are implemented. Demo data resets on reload.
+
+**Next milestone:** Confirm the university/domain and provider decisions, scaffold the production application, then implement signup → onboarding → dashboard → a persistent personal deadline. No production task is marked complete by this frontend milestone.
+
 ## Global Constraints
 
 - Keep this phase frontend-only; do not add authentication, database, API routes, or backend dependencies.
@@ -41,19 +51,19 @@
 - Consumes: Existing DOM IDs `portalSidebar`, `schedulePanel`, `deadlinePanel`, `scheduleClose`, and `deadlineClose`.
 - Produces: `openView(viewName)`, `closeView()`, `setActiveView(viewName)`, and a single `viewName` registry used by all navigation controls.
 
-- [ ] **Step 1: Define the view registry and navigation map**
+- [x] **Step 1: Define the view registry and navigation map**
 
   Add named views for `landing`, `login`, `deadlines`, `notices`, `attendance`, `degree`, `registration`, and `planner`, while retaining `class` and `exam` as schedule modes. Map every sidebar label, hero quick chip, hero CTA, and profile icon to one view key.
 
-- [ ] **Step 2: Implement shared view transitions**
+- [x] **Step 2: Implement shared view transitions**
 
   Add `openView(viewName)` and `closeView()` so opening a view closes all other panels, updates `aria-hidden`, updates the URL hash, and restores focus to the opening/close control when appropriate. Keep schedule loading delegated to the existing `openSchedule(mode)` function.
 
-- [ ] **Step 3: Wire and verify all existing navigation**
+- [x] **Step 3: Wire and verify all existing navigation**
 
   Connect sidebar buttons, quick chips, `Open Schedules`, `Open Portal`, and the profile icon. Verify each route key opens exactly one view and that close/back returns to landing without stale panels or landing content bleed-through.
 
-- [ ] **Step 4: Run the manual route checklist**
+- [x] **Step 4: Run the manual route checklist**
 
   Check landing → login, landing → deadlines, landing → notices, landing → attendance, landing → degree, landing → registration, landing → planner, sidebar → class, sidebar → exam, and close/back from each.
 
@@ -69,19 +79,19 @@
 - Consumes: Task 1 view keys and transition helpers.
 - Produces: Shared `.page-panel`, `.page-panel__header`, `.page-panel__close`, `.page-content`, `.state-card`, and `.demo-list` patterns used by Tasks 3–5.
 
-- [ ] **Step 1: Add shared page-shell markup**
+- [x] **Step 1: Add shared page-shell markup**
 
   Add a consistent fixed panel structure for non-schedule views: eyebrow, heading, description/status line, close button, content region, and optional primary action region.
 
-- [ ] **Step 2: Add shared visual states**
+- [x] **Step 2: Add shared visual states**
 
   Style demo cards, status chips with icon plus text, empty states, error states, and primary/secondary buttons using the existing CSS variables. Keep the background transparent where required and preserve the single fixed watermark.
 
-- [ ] **Step 3: Add responsive and reduced-motion behavior**
+- [x] **Step 3: Add responsive and reduced-motion behavior**
 
   Ensure panels use full width on mobile, content stacks below 760px, interactive targets remain at least 44px, focus outlines remain visible, and transitions are disabled under reduced motion.
 
-- [ ] **Step 4: Verify shared behavior**
+- [x] **Step 4: Verify shared behavior**
 
   Test the shell in dark and light themes at desktop and 360px widths, then verify that closing a panel does not alter sidebar collapse state or watermark position.
 
@@ -97,19 +107,19 @@
 - Consumes: `openView('login')`, `closeView()`, and shared page-shell controls.
 - Produces: Login form with email and password inputs, inline validation, demo sign-in action, and return-to-portal behavior.
 
-- [ ] **Step 1: Add the login form**
+- [x] **Step 1: Add the login form**
 
   Include email, password, remember-me control, forgot-password link state, sign-in button, and a back-to-portal control. Keep copy explicit that this is a frontend demo where necessary.
 
-- [ ] **Step 2: Add client-side validation**
+- [x] **Step 2: Add client-side validation**
 
   Require a non-empty valid-looking email and a non-empty password, show inline errors, and prevent the demo transition until the form is valid.
 
-- [ ] **Step 3: Add demo sign-in transition**
+- [x] **Step 3: Add demo sign-in transition**
 
   On valid submission, show a short success state and return to the portal landing view; do not persist or send credentials.
 
-- [ ] **Step 4: Verify login behavior**
+- [x] **Step 4: Verify login behavior**
 
   Test profile icon navigation, invalid form submission, valid demo sign-in, forgot-password visual state, close/back, keyboard tab order, and mobile layout.
 
@@ -125,19 +135,19 @@
 - Consumes: Shared page-shell and view router from Tasks 1–2.
 - Produces: `notices`, `attendance`, and `degree` pages with static/demo data and intentional states.
 
-- [ ] **Step 1: Build Notices page**
+- [x] **Step 1: Build Notices page**
 
   Add search/filter controls, category chips, unread/read indicators, three representative notice cards, and a no-results state when the search/filter excludes all cards.
 
-- [ ] **Step 2: Build Attendance page**
+- [x] **Step 2: Build Attendance page**
 
   Add attendance summary cards, course rows with attended/total values, solid status indicators with text, and an empty/error state for unavailable records.
 
-- [ ] **Step 3: Build Degree Progress page**
+- [x] **Step 3: Build Degree Progress page**
 
   Add overall credit progress, requirement-group rows, completed/in-progress/remaining status text, and an incomplete-data banner with a link back to onboarding/login context.
 
-- [ ] **Step 4: Verify information pages**
+- [x] **Step 4: Verify information pages**
 
   Test each page from sidebar and hero quick chips, search/filter empty states, responsive stacking, theme contrast, and close/back behavior.
 
@@ -153,15 +163,15 @@
 - Consumes: Shared page-shell, demo cards, and view router.
 - Produces: `registration` and `planner` pages with clickable planning interactions.
 
-- [ ] **Step 1: Build Registration Copilot page**
+- [x] **Step 1: Build Registration Copilot page**
 
   Add semester selector, preference controls, course-plan rows, conflict warning, and a disabled/loading/demo result state. Keep the action read-only and label it as a prototype.
 
-- [ ] **Step 2: Build Semester Planner page**
+- [x] **Step 2: Build Semester Planner page**
 
   Add term tabs or selector, weekly planning summary, planned-course cards, add-course visual action, and an empty semester state.
 
-- [ ] **Step 3: Verify planning pages**
+- [x] **Step 3: Verify planning pages**
 
   Test navigation, selector changes, warning state, empty state, mobile layout, and keyboard operation.
 
@@ -177,15 +187,15 @@
 - Consumes: Existing `openSchedule(mode)`, `renderSchedule()`, `closePanels()`, and the Task 1 view router.
 - Produces: Class, Exam, and Deadlines views with consistent navigation and no stale landing artifacts.
 
-- [ ] **Step 1: Integrate Class and Exam views**
+- [x] **Step 1: Integrate Class and Exam views**
 
   Preserve the Connect fetch, course/faculty filters, sorting, result count, loading/error copy, and schedule close behavior while routing through `openView('class')` or `openView('exam')`.
 
-- [ ] **Step 2: Improve the Deadlines demo page**
+- [x] **Step 2: Improve the Deadlines demo page**
 
   Preserve the existing deadline cards and add grouped status/source presentation, a visible add-deadline demo action, and an empty state without implying persistence.
 
-- [ ] **Step 3: Verify view isolation**
+- [x] **Step 3: Verify view isolation**
 
   Test landing → deadlines → class → exam → landing, confirming only one page is visible, the fixed watermark does not move, and the transparent sidebar/hover glass behavior is unchanged.
 
@@ -202,22 +212,22 @@
 - Consumes: All view keys and page panels from Tasks 1–6.
 - Produces: A complete clickable frontend-only prototype with no inert primary navigation controls.
 
-- [ ] **Step 1: Audit all buttons and links**
+- [x] **Step 1: Audit all buttons and links**
 
   Enumerate every `button`, anchor, and navigation item; assign a view, visual state, or explicit no-op explanation. Remove accidental inert primary actions.
 
-- [ ] **Step 2: Add final accessibility attributes**
+- [x] **Step 2: Add final accessibility attributes**
 
   Confirm panel labels, `aria-hidden`, `aria-expanded`, input labels, close buttons, focus-visible styles, and escape-key close behavior for open panels.
 
-- [ ] **Step 3: Verify the full interaction matrix**
+- [x] **Step 3: Verify the full interaction matrix**
 
   Test every page from every relevant entry point, profile-to-login, demo sign-in-to-portal, close/back, theme toggle, collapsed-sidebar hover expansion, 360px layout, and reduced-motion mode.
 
-- [ ] **Step 4: Run repository checks**
+- [x] **Step 4: Run repository checks**
 
   Run `git diff --check -- frontend/index.html buildplan.md`. No build/test command is currently configured; report manual verification and this limitation honestly.
 
-- [ ] **Step 5: Update project tracking**
+- [x] **Step 5: Update project tracking**
 
   Record the frontend prototype milestone in `buildplan.md` without marking the production Next.js/database/authentication work complete.
