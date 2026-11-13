@@ -28,7 +28,7 @@ and disables academic submission when program/semester choices are unavailable.
 
 | Area | Implemented locally | Remaining |
 | --- | --- | --- |
-| Foundation | pnpm/Turborepo, Next.js, TypeScript, ESLint, formatting, shared schemas/domain packages, health endpoint, CI definition | Hosted CI/deployment and monitoring |
+| Foundation | pnpm/Turborepo, Next.js, TypeScript, ESLint, formatting, shared schemas/domain packages, health endpoint, CI definition | Deployment and monitoring; current CI run status is available in GitHub Actions |
 | Authentication | Supabase SSR, Google-only BRACU student login, exact-domain and provider-owned Workspace claim checks in callback/RLS, nullable pre-onboarding student ID, separate invited-admin password login, recovery and role guards; live Google provider/routing verified | Real Workspace sign-in and account-linking acceptance, release lockout/session/MFA policy |
 | Student pages | Dashboard, manual enrollment schedule, private Connect schedule/exam import, opt-in generic Connect data archive with redaction/review/export/removal, downloadable browser extension, public class/exam browser, deadlines, notices/details, profile, settings, notifications | Authoritative catalog, semantic integration of additional Connect records, real Connect acceptance and hosted persistence verification |
 | Academic tools | Completed-credit totals, AND/OR prerequisite checks, attendance logs, saved semester/registration plans, bounded conflict-free solver | Official requirement-group audit, confirmed attendance/credit rules, richer optimization |
@@ -44,6 +44,13 @@ redirects.
 
 ## Verification
 
+- CI navigation repair: planner and history tests now assert the destination URL
+  and heading before interacting. The original planner failure was reproduced
+  with a held navigation response, and the history failure reproduced locally.
+  Both corrected tests passed five consecutive runs each, followed by all 16
+  browser tests passing together. Failed CI runs retain screenshots/traces for
+  seven days. The preceding hosted run passed install, typecheck, lint, all 63
+  unit/database tests and production build before those two browser failures.
 - Typecheck passes for all four workspace packages; lint, formatting, and production build pass. The development server starts and its health endpoint responds successfully.
 - 63 unit/schema/PostgreSQL/extension/OAuth tests pass, including actual migration application,
   repeatable seed, tenant filtering, signup role forgery, privilege escalation,

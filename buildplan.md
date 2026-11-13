@@ -16,12 +16,12 @@
 
 | Field | Value |
 |---|---|
-| Last task completed | Verified all 21 hosted tables and enabled private Connect imports before academic onboarding |
+| Last task completed | Corrected the CI browser navigation races and added retained failure diagnostics |
 | Completed date | November 14, 2026 |
 | Current next task | Sign in with a real BRACU Google account, verify private Connect import persistence, and provision the verified academic catalog |
 | Current owner | Project team |
-| Status | Google routing and hosted table availability verified; real student account acceptance pending |
-| Notes | All 21 expected tables are available through the Data API and reject anonymous requests with 42501. Google provider/callback routing is verified. Authenticated Workspace students can now review/save private Connect imports before academic profile completion; other academic actions still require onboarding. Empty-catalog onboarding has import links and a disabled academic submit. 63 unit/database tests, 16 browser tests, direct type checks, lint and production build pass. |
+| Status | CI browser-test correction verified locally; real student account acceptance pending |
+| Notes | Reproduced the back-navigation race locally and the planner race with a held navigation response. Both tests now wait for destination URL and heading; registration selects MAT215 explicitly. Ten repeated targeted checks and the full 16-test browser suite pass. CI retains failure screenshots/traces for seven days. The previous hosted run already passed install, typecheck, lint, 63 unit/database tests and production build. |
 
 ### Task update format
 
@@ -658,6 +658,7 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Date | Task | Result | Next action |
 |---|---|---|---|
+| November 14, 2026 | CI browser navigation repair | Confirmed both failures came from interacting before client navigation committed; the planner failure also affected the previous commit. Added destination assertions and an explicit eligible-course selector, plus retained failure diagnostics. Ten targeted repeated checks and all 16 browser tests pass locally. | Publish the fix and verify GitHub Actions, then resume real student acceptance |
 | November 14, 2026 | Hosted schema verification and import-first onboarding | All 21 tables return expected anonymous permission denials instead of missing-table errors. New students can import private Connect data before academic onboarding; catalog-dependent submission remains disabled until choices exist. 63 unit/database and 16 browser tests pass, plus static checks/build. | Real Google account sign-in and saved Connect import acceptance; authoritative program/semester setup |
 | November 14, 2026 | Google verification and SQL Editor bootstrap | Verified Google enabled and correct OAuth callback routing using a cancelled test flow. Prepared and tested a transaction-safe single-file setup with tenant/bootstrap data and explicit privilege restrictions; 57 tests pass. | Run generated SQL in the project's SQL Editor, then verify hosted schema and real student auth |
 | November 14, 2026 | Activated and verified Supabase connection | Validated the saved publishable key without printing it; Auth settings return 200 and the running FRIDAY health endpoint reports backendConfigured=true. Google provider is disabled; five zero-row table probes return PGRST205. | Enable Google and inspect/apply the prepared migrations using SQL Editor or an authenticated administrative connection |
@@ -677,6 +678,7 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Date | Change | Reason |
 |---|---|---|
+| November 14, 2026 | Wait for destination pages in planner/history browser tests and upload failure diagnostics in CI | Fast test actions could check the old page's checkbox or go back before navigation committed; preserve screenshots/traces for future failures |
 | November 14, 2026 | Allowed only setup/private-import pages and actions before academic onboarding | Newly signed-in students should not be blocked from importing their own records while the authoritative catalog is being configured; session, Workspace, role and owner checks remain enforced |
 | November 14, 2026 | Added a tested SQL Editor setup generator and hardened inherited Connect table grants | Make hosted first setup concrete without a management connection; support existing Auth accounts and deny inherited anonymous/TRUNCATE privileges |
 | November 14, 2026 | Activated ignored local Supabase configuration and recorded live verification results | The public publishable key is now supplied and accepted; remaining blockers are Google provider and hosted schema setup |

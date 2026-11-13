@@ -154,7 +154,9 @@ test("planner and conflict-free registration produce saved plans", async ({ page
   await page.getByRole("button", { name: "Save semester plan", exact: true }).click();
   await expect(page.getByRole("heading", { name: "My next semester" })).toBeVisible();
   await page.getByRole("link", { name: "Registration Copilot", exact: true }).click();
-  await page.getByRole("checkbox").first().check();
+  await expect(page).toHaveURL("/preview/registration");
+  await expect(page.locator("main h1")).toHaveText("Registration Copilot");
+  await page.getByRole("checkbox", { name: "MAT215 · 3 credits", exact: true }).check();
   await page.getByRole("button", { name: "Generate plans", exact: true }).click();
   await expect(page.getByText("✓ No class-time conflicts")).toBeVisible();
   await page.getByRole("button", { name: "Save registration plan", exact: true }).click();
@@ -231,7 +233,10 @@ test("theme, reduced motion, back navigation, and keyboard skip link remain usab
   await page.getByRole("button", { name: "Toggle theme" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.getByRole("link", { name: "Degree progress", exact: true }).click();
+  await expect(page).toHaveURL("/preview/degree");
+  await expect(page.locator("main h1")).toHaveText("Degree progress");
   await page.goBack();
+  await expect(page).toHaveURL("/preview");
   await expect(page.locator("main h1")).toHaveText("Your day, in focus");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("link", { name: "Skip to content" }).focus();
