@@ -1797,3 +1797,57 @@ progress {
 .landing-shell .hero-logo-img {
   margin-block: 18px;
 }
+.connect-import {
+  min-width: 0;
+}
+.connect-import textarea {
+  width: 100%;
+  font-family: monospace;
+  resize: vertical;
+}
+.connect-import .schedule-table-wrap {
+  max-width: 100%;
+}
+.connect-import td,
+.connect-import small {
+  overflow-wrap: anywhere;
+}
+.connect-import td > small {
+  display: block;
+  margin-top: 4px;
+}
+.connect-confirm {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding-block: 12px;
+}
+.connect-confirm input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+}
+.connect-data {
+  min-width: 0;
+}
+.connect-data summary,
+.connect-data button {
+  overflow-wrap: anywhere;
+}
+.connect-data textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: monospace;
+}
+.connect-data-record {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.connect-data-record pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 440px;
+  overflow: auto;
+}

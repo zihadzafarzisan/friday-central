@@ -48,6 +48,8 @@ export function sampleData(admin = false): PortalData {
     },
   ];
   return {
+    connectData: [],
+    connectImports: [],
     user: {
       id: ids.user,
       university_id: ids.university,

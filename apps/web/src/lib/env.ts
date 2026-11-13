@@ -3,7 +3,7 @@ const schema = z
   .object({
     url: z.url().optional(),
     key: z.string().min(10).optional(),
-    appUrl: z.url().default("http://localhost:3000"),
+    appUrl: z.url().default("http://127.0.0.1:3000"),
   })
   .refine(
     (env) => Boolean(env.url) === Boolean(env.key),

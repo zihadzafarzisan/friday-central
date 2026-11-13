@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 const student = [
   "",
   "schedule",
+  "connect",
   "deadlines",
   "notices",
   "degree",
@@ -112,7 +113,7 @@ test("real student and admin routes require authentication and preserve destinat
   await page.goto("/admin/users");
   await expect(page).toHaveURL(/\/admin\/login\?next=/);
   expect(new URL(page.url()).searchParams.get("next")).toBe("/admin/users");
-  await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
 });
 test("preview deadlines survive navigation, support filters and safely display markup", async ({
   page,

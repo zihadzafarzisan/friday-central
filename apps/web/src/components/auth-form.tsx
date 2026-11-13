@@ -2,6 +2,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { authenticate } from "@/server/actions";
+import { signInWithStudentGoogle } from "@/server/google-auth";
 import { Field } from "@/components/ui";
 import type { ActionResult } from "@friday/schemas";
 export function AuthForm({
@@ -20,6 +21,40 @@ export function AuthForm({
     message: "",
   } as ActionResult);
   const signup = mode === "signup";
+  const [googleState, googleAction, googlePending] = useActionState(signInWithStudentGoogle, {
+    ok: false,
+    message: "",
+  } as ActionResult);
+  if (!admin && (mode === "login" || mode === "signup"))
+    return (
+      <form action={googleAction} className="demo-card stack auth-card">
+        <p>Use your BRACU student Google Workspace account (@g.bracu.ac.bd).</p>
+        {!configured && (
+          <div className="demo-banner">
+            Account services aren’t connected yet.{" "}
+            <Link href="/preview">Explore the student preview</Link>.
+          </div>
+        )}
+        <input type="hidden" name="next" value={next} />
+        <button
+          className="action-button primary"
+          type="submit"
+          disabled={googlePending || !configured}
+        >
+          {googlePending ? "Opening Google…" : "Continue with Google"}
+        </button>
+        {googleState.message && (
+          <p role="status" className="warning">
+            {googleState.message}
+          </p>
+        )}
+        <p className="form-notice">
+          After signing in, complete your student profile. Connect data sync uses the browser
+          extension while you are signed into Connect.
+        </p>
+        <Link href="/admin/login">Administrator sign-in</Link>
+      </form>
+    );
   return (
     <form action={action} className="demo-card stack auth-card">
       {!configured && (

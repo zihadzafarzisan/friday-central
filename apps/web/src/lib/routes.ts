@@ -1,6 +1,7 @@
 export const studentTitles: Record<string, string> = {
   "": "Your day, in focus",
   schedule: "Your schedule",
+  connect: "Your Connect data",
   deadlines: "Deadlines",
   notices: "Notice board",
   degree: "Degree progress",

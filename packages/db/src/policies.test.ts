@@ -2,6 +2,8 @@ import { PGlite } from "@electric-sql/pglite";
 import { readFile, readdir } from "node:fs/promises";
 import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import { ids, fixtureId } from "./index";
+import { connectFixture } from "../../schemas/src/connect.fixture";
+import { parseConnectSchedule } from "@friday/schemas";
 let db: PGlite;
 const other = fixtureId(900);
 const admin = fixtureId(901);
@@ -33,6 +35,11 @@ async function addUser(
       JSON.stringify(role === "student" ? {} : { role, university_id: university }),
     ],
   );
+  if (role === "student")
+    await db.query(
+      "insert into auth.identities(user_id,provider,identity_data) values($1,'google',$2::jsonb)",
+      [id, JSON.stringify({ email, email_verified: true, custom_claims: { hd: "g.bracu.ac.bd" } })],
+    );
 }
 beforeAll(async () => {
   db = new PGlite();
@@ -40,6 +47,9 @@ beforeAll(async () => {
     `create role anon nologin;create role authenticated nologin;create schema auth;grant usage on schema public,auth to authenticated;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,raw_user_meta_data jsonb default '{}',raw_app_meta_data jsonb default '{}');create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant execute on function auth.uid() to authenticated;`,
   );
   const folder = new URL("../migrations/", import.meta.url);
+  await db.exec(
+    "create table auth.identities(id uuid primary key default gen_random_uuid(),user_id uuid not null references auth.users(id),provider text not null,identity_data jsonb not null default '{}');",
+  );
   for (const file of (await readdir(folder)).sort())
     await db.exec(await readFile(new URL(file, folder), "utf8"));
   const seed = await readFile(new URL("../seed.sql", import.meta.url), "utf8");
@@ -70,6 +80,172 @@ afterAll(async () => {
   await db?.close();
 });
 describe("actual PostgreSQL migrations and policies", () => {
+  it("requires a provider-owned Google Workspace identity and supports first-login onboarding", async () => {
+    const newcomer = fixtureId(920);
+    await db.query(
+      "insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data) values($1,'newcomer@g.bracu.ac.bd',now(),$2::jsonb)",
+      [
+        newcomer,
+        JSON.stringify({
+          full_name: "New student",
+          custom_claims: { hd: "g.bracu.ac.bd" },
+          provider: "google",
+        }),
+      ],
+    );
+    await asUser(newcomer, async () => {
+      expect((await db.query("select * from public.courses")).rows).toHaveLength(0);
+      await expect(
+        db.query(
+          "insert into auth.identities(user_id,provider,identity_data) values($1,'google','{}')",
+          [newcomer],
+        ),
+      ).rejects.toThrow();
+    });
+    const provider = {
+      email: "newcomer@g.bracu.ac.bd",
+      email_verified: true,
+      custom_claims: { hd: "elsewhere.invalid" },
+    };
+    await db.query(
+      "insert into auth.identities(user_id,provider,identity_data) values($1,'google',$2::jsonb)",
+      [newcomer, JSON.stringify(provider)],
+    );
+    await asUser(newcomer, async () =>
+      expect((await db.query("select * from public.courses")).rows).toHaveLength(0),
+    );
+    provider.custom_claims.hd = "g.bracu.ac.bd";
+    await db.query("update auth.identities set identity_data=$2::jsonb where user_id=$1", [
+      newcomer,
+      JSON.stringify(provider),
+    ]);
+    await asUser(newcomer, async () => {
+      expect((await db.query("select * from public.courses")).rows).toHaveLength(4);
+      expect(
+        (
+          await db.query<{ student_id: string | null }>(
+            "select student_id from public.student_profiles",
+          )
+        ).rows[0].student_id,
+      ).toBeNull();
+      await expect(
+        db.query(
+          "update public.student_profiles set onboarding_completed_at=now(),program_id=$1,semester_id=$2",
+          [ids.program, ids.semester],
+        ),
+      ).rejects.toThrow();
+      await db.query(
+        "update public.student_profiles set student_id='26101920',onboarding_completed_at=now(),program_id=$1,semester_id=$2",
+        [ids.program, ids.semester],
+      );
+    });
+    await db.query("delete from auth.identities where user_id=$1", [newcomer]);
+    await asUser(newcomer, async () =>
+      expect((await db.query("select * from public.courses")).rows).toHaveLength(0),
+    );
+  });
+  it("keeps general Connect records owner-only and rejects unredacted credentials at the database boundary", async () => {
+    const save = (
+      owner = ids.user,
+      data: unknown = {
+        grades: [{ code: "CSE101", grade: "A" }],
+        semesterSessionId: 20263,
+        token: "[redacted]",
+      },
+    ) =>
+      db.query(
+        "insert into public.connect_data_records(user_id,university_id,endpoint,data,captured_at) values($1,$2,'/api/student/grades',$3::jsonb,now()) on conflict(user_id,endpoint) do update set data=excluded.data",
+        [owner, ids.university, JSON.stringify(data)],
+      );
+    await asUser(ids.user, async () => {
+      await save();
+      await save();
+      expect((await db.query("select * from public.connect_data_records")).rows).toHaveLength(1);
+      await expect(save(other)).rejects.toThrow();
+      for (const raw of [
+        { access_token: "private" },
+        { nested: [{ authorization: "Bearer private" }] },
+        { text: "Bearer private" },
+      ])
+        await expect(save(ids.user, raw)).rejects.toThrow();
+      await expect(
+        db.query("update public.connect_data_records set endpoint='/api/auth/token'"),
+      ).rejects.toThrow();
+      await expect(
+        db.query("update public.connect_data_records set method='POST'"),
+      ).rejects.toThrow();
+      expect((await db.query("select * from public.connect_data_records")).rows).toHaveLength(1);
+    });
+    for (const user of [other, admin])
+      await asUser(user, async () => {
+        expect((await db.query("select * from public.connect_data_records")).rows).toHaveLength(0);
+        expect(
+          (await db.query("delete from public.connect_data_records returning *")).rows,
+        ).toHaveLength(0);
+      });
+    await asUser(ids.user, async () => {
+      await db.query("delete from public.connect_data_records");
+    });
+  });
+  it("keeps Connect imports private, replaces each semester atomically, and leaves the catalog intact", async () => {
+    const courses = parseConnectSchedule(JSON.stringify(connectFixture()));
+    const save = (owner = ids.user, tenant = ids.university, payload = courses) =>
+      db.query(
+        `insert into public.connect_schedule_imports(user_id,university_id,semester_session_id,courses,imported_at)
+       values($1,$2,20263,$3::jsonb,'2000-01-01') on conflict(user_id,semester_session_id)
+       do update set courses=excluded.courses,imported_at=excluded.imported_at`,
+        [owner, tenant, JSON.stringify(payload)],
+      );
+    await asUser(ids.user, async () => {
+      await save();
+      await save();
+      const result = await db.query<{ courses: unknown[]; imported_at: Date }>(
+        "select courses,imported_at from public.connect_schedule_imports",
+      );
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].courses).toHaveLength(7);
+      expect(new Date(result.rows[0].imported_at).getUTCFullYear()).toBeGreaterThan(2000);
+      await expect(save(other)).rejects.toThrow();
+      await expect(save(ids.user, uni2)).rejects.toThrow();
+      const malformed = structuredClone(courses);
+      malformed[0].sectionSchedule.classSchedules[0].endTime = "01:00:00";
+      await expect(save(ids.user, ids.university, malformed)).rejects.toThrow();
+      const extra = courses.map((row) => ({ ...row, authorization: "test-only" }));
+      await expect(save(ids.user, ids.university, extra)).rejects.toThrow();
+      await expect(
+        db.query("update public.connect_schedule_imports set semester_session_id=20271"),
+      ).rejects.toThrow();
+      // Failed writes leave the previous complete snapshot in place.
+      expect(
+        (await db.query("select courses from public.connect_schedule_imports")).rows,
+      ).toHaveLength(1);
+    });
+    for (const user of [other, admin])
+      await asUser(user, async () => {
+        expect((await db.query("select * from public.connect_schedule_imports")).rows).toHaveLength(
+          0,
+        );
+        expect(
+          (await db.query("delete from public.connect_schedule_imports returning *")).rows,
+        ).toHaveLength(0);
+      });
+    await db.exec("set role anon");
+    try {
+      await expect(db.query("select * from public.connect_schedule_imports")).rejects.toThrow();
+    } finally {
+      await db.exec("reset role");
+    }
+    expect(
+      (await db.query<{ count: number }>("select count(*)::int as count from public.courses"))
+        .rows[0].count,
+    ).toBe(5);
+    await asUser(ids.user, async () => {
+      await db.query("delete from public.connect_schedule_imports");
+      expect((await db.query("select * from public.connect_schedule_imports")).rows).toHaveLength(
+        0,
+      );
+    });
+  });
   it("applies the migration and seed twice without duplicate catalog records", async () => {
     const result = await db.query<{ count: number }>(
       "select count(*)::int as count from public.courses",

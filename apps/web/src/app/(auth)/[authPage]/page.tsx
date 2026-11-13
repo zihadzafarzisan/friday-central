@@ -33,7 +33,11 @@ export default async function AuthPage({
               ? search.error
                 ? "That link is invalid or expired. Request a fresh verification email."
                 : "Check your student inbox for your verification link. You can request another below."
-              : "Your university life, a little more organised."
+              : search.error === "workspace"
+                ? "Use your verified BRACU Google Workspace account (@g.bracu.ac.bd)."
+                : search.error === "google" || search.error === "account"
+                  ? "Google sign-in could not finish. Try again with your active BRACU student account."
+                  : "Your university life, a little more organised."
           }
         />
         <AuthForm mode={mode} configured={isConfigured()} next={search.next} />

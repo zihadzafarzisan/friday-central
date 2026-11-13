@@ -7,6 +7,7 @@ import {
   loginSchema,
   mutationSchemas,
   safeNext,
+  canMutateBeforeOnboarding,
   type MutationKind,
   type ActionResult,
 } from "@friday/schemas";
@@ -26,35 +27,12 @@ export async function authenticate(
       message: "Supabase is not connected yet. You can explore every page in the preview.",
     };
   const input = Object.fromEntries(form);
-  const origin = environment().appUrl;
-  if (mode === "signup") {
-    const result = signupSchema.safeParse(input);
-    if (!result.success)
-      return {
-        ok: false,
-        message: "Check the highlighted fields.",
-        fields: z.flattenError(result.error).fieldErrors,
-      };
-    const { email, password, full_name, student_id } = result.data;
-    const { error } = await client.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name, student_id },
-        emailRedirectTo: `${origin}/auth/callback?next=/app/onboarding`,
-      },
-    });
-    if (error)
-      return {
-        ok: false,
-        message: "Signup could not be completed. Check your details or try again later.",
-      };
+  if (mode === "signup" || (mode === "login" && input.portal !== "admin"))
     return {
-      ok: true,
-      message:
-        "If this address can be registered, a verification email is on its way. Check your inbox before signing in.",
+      ok: false,
+      message: "Students must continue with their BRACU Google Workspace account.",
     };
-  }
+  const origin = environment().appUrl;
   if (mode === "forgot" || mode === "resend") {
     const parsed = z.email().safeParse(input.email);
     if (!parsed.success) return { ok: false, message: "Enter a valid email address." };
@@ -151,7 +129,7 @@ export async function mutate(kind: MutationKind, raw: unknown): Promise<ActionRe
   const { client, user } = await requireIdentity(
     admin ? "admin" : "student",
     admin ? "/admin" : "/app",
-    kind !== "profile_save",
+    !canMutateBeforeOnboarding(kind),
   );
   const tenant = user.university_id;
   const own = { university_id: tenant, user_id: user.id };
@@ -161,6 +139,56 @@ export async function mutate(kind: MutationKind, raw: unknown): Promise<ActionRe
   };
   try {
     switch (kind) {
+      case "connect_data_import": {
+        const { entries } = mutationSchemas.connect_data_import.parse(raw);
+        await check(
+          client.from("connect_data_records").upsert(
+            entries.map((entry) => ({ ...entry, ...own })),
+            { onConflict: "user_id,endpoint" },
+          ),
+        );
+        break;
+      }
+      case "connect_data_delete": {
+        const { endpoint } = mutationSchemas.connect_data_delete.parse(raw);
+        await check(
+          client
+            .from("connect_data_records")
+            .delete()
+            .eq("user_id", user.id)
+            .eq("university_id", tenant)
+            .eq("endpoint", endpoint),
+        );
+        break;
+      }
+      case "connect_schedule_import": {
+        const { courses } = mutationSchemas.connect_schedule_import.parse(raw);
+        if (new TextEncoder().encode(JSON.stringify(courses)).byteLength > 262144)
+          return { ok: false, message: "Schedule JSON must be 256 KB or smaller." };
+        await check(
+          client.from("connect_schedule_imports").upsert(
+            {
+              ...own,
+              semester_session_id: courses[0].semesterSessionId,
+              courses,
+            },
+            { onConflict: "user_id,semester_session_id" },
+          ),
+        );
+        break;
+      }
+      case "connect_schedule_delete": {
+        const { semester_session_id } = mutationSchemas.connect_schedule_delete.parse(raw);
+        await check(
+          client
+            .from("connect_schedule_imports")
+            .delete()
+            .eq("user_id", user.id)
+            .eq("university_id", tenant)
+            .eq("semester_session_id", semester_session_id),
+        );
+        break;
+      }
       case "deadline_create": {
         const input = mutationSchemas.deadline_create.parse(raw);
         if (new Date(input.due_at).getTime() < Date.now() - 60000)

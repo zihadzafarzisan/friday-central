@@ -17,6 +17,8 @@ import {
 } from "@/components/ui";
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 import { studentTitles } from "@/lib/routes";
+import { ConnectScheduleImport } from "@/components/connect-schedule-import";
+import { ConnectDataImport } from "@/components/connect-data-import";
 function DueFields({ value }: { value?: Deadline }) {
   let local = "";
   if (value) {
@@ -122,6 +124,8 @@ export function StudentPage({
     );
   }
   let content;
+  if (name === "connect")
+    content = <ConnectDataImport records={data.connectData} act={act} preview={preview} />;
   if (name === "")
     content = (
       <>
@@ -173,6 +177,7 @@ export function StudentPage({
   if (name === "schedule")
     content = (
       <>
+        <ConnectScheduleImport imports={data.connectImports} act={act} preview={preview} />
         <div className="row">
           <p className="muted">
             These are your manually selected enrollments, not official registration submissions.
@@ -526,14 +531,42 @@ export function StudentPage({
   if (name === "profile" || name === "onboarding")
     content = (
       <>
+        {name === "onboarding" && (
+          <Card title="Bring your Connect records into FRIDAY">
+            <p>
+              You can import your private Connect records and class schedule now, then complete your
+              academic profile.
+            </p>
+            <div className="actions">
+              <Link className="action-button primary" href={`${base}/connect`}>
+                Import Connect records
+              </Link>
+              <Link className="action-button" href={`${base}/schedule`}>
+                Import class schedule
+              </Link>
+            </div>
+          </Card>
+        )}
         <Card title={name === "onboarding" ? "Your academic starting point" : "Academic profile"}>
+          {(!data.programs.length || !data.semesters.length) && (
+            <p className="muted" role="status">
+              Academic setup is being prepared. Program and semester selection will be available
+              after the university catalog is configured. You can use Connect imports in the
+              meantime.
+            </p>
+          )}
           <ActionForm
             kind="profile_save"
+            disabled={!data.programs.length || !data.semesters.length}
             label={name === "onboarding" ? "Continue to dashboard" : "Save profile"}
             onSuccess={name === "onboarding" ? () => router.push(base) : undefined}
           >
             <Field label="Full name" name="full_name" value={data.user.full_name} />
-            <Field label="Student ID" name="student_id" value={data.profile?.student_id} />
+            <Field
+              label="Student ID"
+              name="student_id"
+              value={data.profile?.student_id ?? undefined}
+            />
             <Field label="Program" name="program_id">
               <select name="program_id" required defaultValue={data.profile?.program_id ?? ""}>
                 <option value="">Choose a program</option>

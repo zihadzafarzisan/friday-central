@@ -41,21 +41,38 @@ up the project directly in Supabase.
 3. For development only, run `packages/db/seed.sql`. It is repeatable and contains
    a BRACU tenant and a **sample** program/course/section catalog. Replace sample
    requirements and sections with verified university records before a pilot.
-4. Enable email confirmation, configure production email delivery, and allow
-   `${APP_URL}/auth/callback` as an Auth redirect. The callback handles signup
-   verification and recovery links. Test those flows against the actual project.
+4. Configure Google OAuth for student sign-in using
+   [the Workspace setup guide](docs/google-workspace-auth.md), including the
+   Supabase callback and exact app origin. Keep email confirmation and production
+   email delivery configured for invited administrator accounts and recovery.
 5. Register the first operator using a supported student email. From a trusted
    SQL session, promote that specific account in `public.users` to `super_admin`.
    Staff accounts can instead be provisioned by trusted Supabase administration
    with `app_metadata.role` and `app_metadata.university_id` set at creation.
    Ordinary signup metadata cannot grant administrator access.
+   A Google-created account promoted to administrator also needs an administrator
+   password/invitation or recovery flow configured before using the admin login.
 
 For a local Supabase CLI setup, `pnpm db:prepare` copies the canonical migrations
 into the ignored `supabase/migrations` folder. `supabase/config.toml` points at
 the development seed and enables email confirmation. Supabase CLI/Docker startup
 has not been verified in this workspace because the Docker daemon is unavailable.
 
+For a fresh hosted project, the same command generates `supabase/setup-friday.sql`
+for one-time SQL Editor setup, with a BRACU tenant and existing-account backfill.
+See [first-install instructions and verification](docs/supabase-first-setup.md).
+
 ## Current functionality
+
+Connect schedule import is available on `/app/schedule` and `/preview/schedule`:
+paste/upload the schedule JSON or download the browser extension there. Review
+classes, zero-credit labs and exams before saving a private per-semester snapshot.
+See [setup, storage, verification and limits](docs/connect-schedule-import.md).
+The new migration must be applied to Supabase before authenticated imports work.
+Students use Google Workspace sign-in restricted to `@g.bracu.ac.bd`. The extension
+also offers opt-in capture/review of other Connect student JSON responses on
+`/app/connect`; those records remain private and self-reported. Google login does
+not grant a Connect session. Apply all new migrations before enabling this flow.
 
 - Shared React shell, original logo/watermark, mobile navigation, themes, reduced
   motion, focus states, loading/error/empty pages, and normal URL navigation.
@@ -100,8 +117,10 @@ The CI workflow performs installation, checks, build, and browser tests.
 
 ## Remaining before a real pilot
 
-Connect and verify the hosted Supabase project, replace the sample catalog and
-program rules, and test real student/admin/verification/recovery flows. Complete
+The hosted client connection, Google provider routing and all 21 expected tables
+are verified. Complete real student/admin sign-in and persistence acceptance,
+provision the verified catalog/program rules, and test recovery flows. Connect
+imports are available before academic onboarding. Complete
 provider/session/lockout and admin MFA configuration, full requirement-group
 matching, targeted notices, scheduled email/reminder jobs, account export/deletion,
 monitoring/backups, and the accessibility/security release review. AI provider

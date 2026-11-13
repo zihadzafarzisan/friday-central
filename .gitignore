@@ -12,3 +12,5 @@ playwright-report/
 *.tsbuildinfo
 supabase/.temp/
 supabase/migrations/
+supabase/setup-friday.sql
+apps/web/public/downloads/friday-connect-extension.zip

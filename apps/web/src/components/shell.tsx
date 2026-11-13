@@ -26,6 +26,7 @@ import { ThemeButton } from "@/components/theme-button";
 const studentItems = [
   ["", "Dashboard", LayoutDashboard],
   ["schedule", "Schedule", CalendarDays],
+  ["connect", "Connect data", BookOpen],
   ["deadlines", "Deadlines", Clock],
   ["notices", "Notices", Bell],
   ["degree", "Degree progress", GraduationCap],

@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "FRIDAY Connect Data Sync",
+  "version": "0.2.0",
+  "minimum_chrome_version": "111",
+  "description": "Review and privately sync your own BRACU Connect schedule and optional student data while browsing Connect.",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": ["https://connect.bracu.ac.bd/*"],
+  "optional_host_permissions": ["https://*/*", "http://localhost/*", "http://127.0.0.1/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "Sync Connect data to FRIDAY" },
+  "content_scripts": [
+    {
+      "matches": ["https://connect.bracu.ac.bd/*"],
+      "js": ["shared.js", "capture.js", "data-capture.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://connect.bracu.ac.bd/*"],
+      "js": ["bridge.js"],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+    }
+  ]
+}

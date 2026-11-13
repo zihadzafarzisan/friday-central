@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { userSchema, profileSchema, safeNext } from "@friday/schemas";
+import { userSchema, profileSchema, safeNext, isStudentGoogleUser } from "@friday/schemas";
 import { supabase } from "@/lib/supabase/server";
 export const identity = cache(async () => {
   const client = await supabase();
@@ -14,6 +14,7 @@ export const identity = cache(async () => {
   const result = await client.from("users").select("*").eq("id", user.id).single();
   if (result.error || !result.data) return null;
   const account = userSchema.parse(result.data);
+  if (account.role === "student" && !isStudentGoogleUser(user)) return null;
   if (account.status !== "active") return null;
   const profileResult = await client
     .from("student_profiles")

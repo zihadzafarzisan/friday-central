@@ -1,4 +1,10 @@
 import { z } from "zod";
+import { connectScheduleSchema, type ConnectImportRecord } from "./connect";
+import { connectDataBatchSchema, type ConnectDataRecord } from "./connect-data";
+export * from "./connect";
+export * from "./google-auth";
+export * from "./connect-data";
+export * from "./student-setup";
 
 export const id = z.uuid();
 export const roleSchema = z.enum(["student", "admin", "super_admin"]);
@@ -104,7 +110,7 @@ export type AppUser = z.infer<typeof userSchema>;
 export const profileSchema = z.object({
   user_id: id,
   university_id: id,
-  student_id: z.string(),
+  student_id: z.string().nullable(),
   program_id: id.nullable(),
   semester_id: id.nullable(),
   onboarding_completed_at: z.string().nullable(),
@@ -192,6 +198,8 @@ export const auditSchema = z.object({
 });
 
 export interface PortalData {
+  connectData: ConnectDataRecord[];
+  connectImports: ConnectImportRecord[];
   user: AppUser;
   profile: z.infer<typeof profileSchema> | null;
   programs: z.infer<typeof programSchema>[];
@@ -214,6 +222,12 @@ export interface PortalData {
 const text = z.string().trim().min(1).max(200);
 const check = z.enum(["true", "false"]);
 export const mutationSchemas = {
+  connect_data_import: z.object({ entries: connectDataBatchSchema }),
+  connect_data_delete: z.object({ endpoint: z.string().min(1).max(1024) }),
+  connect_schedule_import: z.object({ courses: connectScheduleSchema }),
+  connect_schedule_delete: z.object({
+    semester_session_id: z.number().int().positive().max(2147483647),
+  }),
   deadline_create: z.object({
     title: text,
     description: z.string().trim().max(2000).default(""),

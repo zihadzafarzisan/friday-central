@@ -13,8 +13,8 @@ enabled = true
 sql_paths = ["../packages/db/seed.sql"]
 [auth]
 enabled = true
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["http://127.0.0.1:3000/auth/callback", "http://localhost:3000/auth/callback"]
 enable_signup = true
 minimum_password_length = 8
 [auth.email]
@@ -23,3 +23,9 @@ enable_confirmations = true
 double_confirm_changes = true
 [auth.rate_limit]
 sign_in_sign_ups = 20
+[auth.external.google]
+# Enable after setting local provider credentials; hosted configuration lives in Supabase Auth.
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+skip_nonce_check = false

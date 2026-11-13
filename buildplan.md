@@ -6,7 +6,7 @@
 **Plan created:** October 21, 2026
 **Current release target:** MVP / Release 1
 **Current phase:** Phase 0 — Foundation
-**Overall status:** All-page Next.js migration implemented and locally verified; hosted Supabase setup pending
+**Overall status:** App, Google provider and hosted table availability verified; real student acceptance and authoritative catalog pending
 **Primary specification:** `prd.md`
 **Supporting documents:** `techstack.md`, `app-flow.md`, `database.md`, `design-guide.md`
 
@@ -16,12 +16,12 @@
 
 | Field | Value |
 |---|---|
-| Last task completed | Migrated student/admin pages to Next.js and implemented the Supabase integration |
-| Completed date | November 8, 2026 |
-| Current next task | Connect the hosted Supabase project, apply migrations, and verify real student/admin flows |
+| Last task completed | Verified all 21 hosted tables and enabled private Connect imports before academic onboarding |
+| Completed date | November 14, 2026 |
+| Current next task | Sign in with a real BRACU Google account, verify private Connect import persistence, and provision the verified academic catalog |
 | Current owner | Project team |
-| Status | Local migration done; hosted integration pending |
-| Notes | Student/admin routes, shared React UI, server actions, SQL migrations/RLS, domain tools, CI definition, and local tests are implemented. See docs/production-status.md for exact coverage and remaining release work. |
+| Status | Google routing and hosted table availability verified; real student account acceptance pending |
+| Notes | All 21 expected tables are available through the Data API and reject anonymous requests with 42501. Google provider/callback routing is verified. Authenticated Workspace students can now review/save private Connect imports before academic profile completion; other academic actions still require onboarding. Empty-catalog onboarding has import links and a disabled academic submit. 63 unit/database tests, 16 browser tests, direct type checks, lint and production build pass. |
 
 ### Task update format
 
@@ -242,6 +242,13 @@ docs/
 
 ### P0-T07: Add route guards and role-based policies
 
+Google Workspace extension (November 12, 2026): student entry now uses Google OAuth,
+with exact `@g.bracu.ac.bd` email and provider-owned `custom_claims.hd` enforcement in
+the callback, service guard and database tenant helper. Student password entry is
+disabled; invited-admin password login remains separate. Student IDs may be missing
+only before onboarding. Local tests pass; Google credentials/provider configuration
+and hosted acceptance remain pending. See `docs/google-workspace-auth.md`.
+
 **Status:** In progress
 **Planned dates:** November 7–8, 2026
 **Dependencies:** P0-T06
@@ -319,6 +326,32 @@ docs/
 - [ ] Show changed badges and last-synced timestamps where relevant.
 
 **Verification:** Dashboard and schedule E2E tests pass with populated, empty, loading, and error states.
+
+### P1-T02a: Import personal Connect schedules
+
+**Status:** Done (local implementation and verification)
+**Started / completed:** November 12, 2026
+
+- [x] Paste/upload bounded schedule JSON with preview and explicit confirmation.
+- [x] Preserve theory/labs, zero credits, parent links, meetings, exams, semester/section IDs and raw seat counts.
+- [x] Store owner-only snapshots by semester with atomic replacement, timestamps and removal; leave shared catalog and manual enrollments intact.
+- [x] Package a Chrome/Edge extension with response-only capture and consent-based handoff; keep Connect credentials out of FRIDAY.
+- [x] Test schema/privacy boundaries, PostgreSQL RLS, duplicate imports, upload, mobile layout, actual unpacked extension and sign-in redirect handling.
+- [ ] Apply the new migration to hosted Supabase and accept a real authenticated Connect-to-FRIDAY import in the user's browser.
+
+See `docs/connect-schedule-import.md` for setup and limits. Hosted acceptance is tracked separately from the completed local implementation.
+
+### P1-T02b: Private Connect data archive
+
+**Status:** Done (local implementation and verification)
+**Started / completed:** November 12, 2026
+
+`/app/connect` and `/preview/connect` review, save, replace, export and remove
+private snapshots from opt-in extension capture of successful Connect JSON GET
+responses. Auth endpoints are excluded and known credential fields are redacted
+in the extension/server with independent database checks. Batches are capped at
+100 endpoints / 768 KB and responses at 256 KB. Generic snapshots remain separate
+from degree, payment and registration state. Real Connect/provider acceptance is pending.
 
 ### P1-T03: Build the unified deadline manager
 
@@ -608,14 +641,14 @@ The MVP can be released to a pilot only when all of the following are true:
 | Decision | Current state | Required before | Owner | Status |
 |---|---|---|---|---|
 | Pilot university and email domain | BRAC University; `g.bracu.ac.bd`; Asia/Dhaka | Authentication and seed data | Project team | Selected |
-| University data access | Public Connect JSON browser implemented; authoritative catalog/import and student enrollment source unconfirmed | Production catalog import and personal schedule | Project team | Ready to decide |
+| University data access | Public third-party schedule feed plus private imports from the identified Connect student schedule endpoint; authoritative catalog and university-wide live seat source remain unconfirmed | Production catalog and live availability | Project team | Personal import implemented; official data access open |
 | AI provider and model | `techstack.md` says “LLM (Will decide later) API” | Notice intelligence and assistant | Project team | Blocked |
-| Database host | Supabase PostgreSQL; integration/project not connected yet | Hosted database verification | Project team | Selected; setup pending |
+| Database host | Supabase client/key verified; all 21 expected tables are available and reject anonymous access; administrative SQL connection remains unavailable | Real student persistence and owner-policy acceptance | Project team | Client and hosted tables verified |
 | Schema owner | Supabase versioned SQL migrations and authenticated client | Schema implementation | Project team | Selected |
-| Auth provider | Supabase Auth; SSR integration implemented | Hosted account/verification/recovery checks | Project team | Selected; setup pending |
+| Auth provider | Supabase Auth with Google Workspace-only students and invited-admin password login; callback/RLS domain enforcement implemented | Google OAuth configuration and hosted account/session checks | Project team | Implemented locally; provider setup pending |
 | Queue provider | Inngest or BullMQ; plan assumes Inngest | Reminders and notification jobs | Project team | Ready to decide |
 | Completed-course entry | Manual catalog selection | Onboarding | Project team | Selected |
-| Enrollment source | Manual catalog selection; authoritative import remains open | Dashboard and schedule | Project team | Initial source selected |
+| Enrollment source | Manual catalog selection plus reviewed private Connect snapshots; imports are self-reported | Dashboard and schedule | Project team | Implemented locally; hosted acceptance pending |
 | Admin 2FA | Open question | Pilot security review | Project team | Open |
 | Grades in MVP | Optional; completed status drives earned credits | Degree and CGPA scope | Project team | Selected |
 
@@ -625,6 +658,12 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Date | Task | Result | Next action |
 |---|---|---|---|
+| November 14, 2026 | Hosted schema verification and import-first onboarding | All 21 tables return expected anonymous permission denials instead of missing-table errors. New students can import private Connect data before academic onboarding; catalog-dependent submission remains disabled until choices exist. 63 unit/database and 16 browser tests pass, plus static checks/build. | Real Google account sign-in and saved Connect import acceptance; authoritative program/semester setup |
+| November 14, 2026 | Google verification and SQL Editor bootstrap | Verified Google enabled and correct OAuth callback routing using a cancelled test flow. Prepared and tested a transaction-safe single-file setup with tenant/bootstrap data and explicit privilege restrictions; 57 tests pass. | Run generated SQL in the project's SQL Editor, then verify hosted schema and real student auth |
+| November 14, 2026 | Activated and verified Supabase connection | Validated the saved publishable key without printing it; Auth settings return 200 and the running FRIDAY health endpoint reports backendConfigured=true. Google provider is disabled; five zero-row table probes return PGRST205. | Enable Google and inspect/apply the prepared migrations using SQL Editor or an authenticated administrative connection |
+| November 14, 2026 | Supabase skills and project configuration | Installed both official Supabase skills, verified existing JS/SSR packages, and staged the provided project URL in an ignored pending environment file. No live key was supplied. | Supply the public publishable key, activate .env.local, configure Google OAuth and verify hosted migrations/auth |
+| November 12, 2026 | Google Workspace auth and broader Connect data | Added Google-only student entry, trusted Workspace claim checks, onboarding support and opt-in redacted private Connect archive. 54 unit/database/OAuth and 16 browser tests pass, with production build and static checks. | Connect Supabase, configure Google OAuth credentials, apply staged migrations and accept real student login/sync |
+| November 12, 2026 | P1-T02a: Connect schedule import | Completed paste/upload, private semester snapshots, labs/exams, extension package and redirect-safe browser handoff. 39 unit/database and 14 browser tests pass; typecheck/lint/format/build pass. Migrations staged locally. | Connect Supabase, apply migrations, install extension in the user's browser and verify a real import |
 | October 21, 2026 | Read `prd.md`, `techstack.md`, `app-flow.md`, `database.md`, and `design-guide.md` | Requirements, routes, data model, stack, design, security, and release phases mapped | Confirm decisions in P0-T01 and P0-T02 |
 | October 21, 2026 | Created `buildplan.md` | Full project plan and tracking structure created | Start P0-T01 |
 | October 23, 2026 | Schedule prototype integration | Added Class and Exam views with course/faculty/semester filters backed by the public Connect JSON dataset | Scaffold the server-side application integration |
@@ -638,6 +677,12 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Date | Change | Reason |
 |---|---|---|
+| November 14, 2026 | Allowed only setup/private-import pages and actions before academic onboarding | Newly signed-in students should not be blocked from importing their own records while the authoritative catalog is being configured; session, Workspace, role and owner checks remain enforced |
+| November 14, 2026 | Added a tested SQL Editor setup generator and hardened inherited Connect table grants | Make hosted first setup concrete without a management connection; support existing Auth accounts and deny inherited anonymous/TRUNCATE privileges |
+| November 14, 2026 | Activated ignored local Supabase configuration and recorded live verification results | The public publishable key is now supplied and accepted; remaining blockers are Google provider and hosted schema setup |
+| November 14, 2026 | Prepared the supplied Supabase project settings and installed official agent skills | Continue hosted setup without treating the literal SECRET_KEY placeholder as a working credential |
+| November 12, 2026 | Added BRACU Google Workspace login and opt-in general Connect JSON capture | Identify students with institutional Google accounts and collect reviewed personal records while retaining Connect's separate authorization boundary |
+| November 12, 2026 | Added reviewed personal Connect imports and a Chrome/Edge response-capture extension | Sync schedules without collecting Connect credentials or altering the shared catalog; preserve explicit freshness and verification limits |
 | October 21, 2026 | Initial build plan created | Consolidated the current PRD, tech stack, app flow, database, and design documents |
 | October 23, 2026 | Added public schedule data prototype | Class and exam navigation now display Connect course, timetable, faculty, room, seat, and exam data |
 | November 8, 2026 | Completed the frontend-only milestone; added README/browser smoke suite; corrected stale repository/scaffold status | Distinguish the usable prototype from production work that has not started; preserve existing visual identity and schedule source |

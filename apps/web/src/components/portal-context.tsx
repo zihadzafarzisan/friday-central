@@ -42,6 +42,36 @@ export function usePortal(initial: PortalData, preview: boolean) {
     const id = crypto.randomUUID();
     const own = { id, university_id: data.user.university_id, user_id: data.user.id };
     switch (kind) {
+      case "connect_data_import": {
+        const { entries } = mutationSchemas.connect_data_import.parse(raw);
+        const keys = new Set(entries.map((row) => row.endpoint));
+        next.connectData = [
+          ...entries.map((row) => ({ ...row, imported_at: now })),
+          ...next.connectData.filter((row) => !keys.has(row.endpoint)),
+        ].slice(0, 100);
+        break;
+      }
+      case "connect_data_delete": {
+        const { endpoint } = mutationSchemas.connect_data_delete.parse(raw);
+        next.connectData = next.connectData.filter((row) => row.endpoint !== endpoint);
+        break;
+      }
+      case "connect_schedule_import": {
+        const { courses } = mutationSchemas.connect_schedule_import.parse(raw);
+        const semester_session_id = courses[0].semesterSessionId;
+        next.connectImports = next.connectImports.filter(
+          (row) => row.semester_session_id !== semester_session_id,
+        );
+        next.connectImports.push({ semester_session_id, courses, imported_at: now });
+        break;
+      }
+      case "connect_schedule_delete": {
+        const { semester_session_id } = mutationSchemas.connect_schedule_delete.parse(raw);
+        next.connectImports = next.connectImports.filter(
+          (row) => row.semester_session_id !== semester_session_id,
+        );
+        break;
+      }
       case "deadline_create": {
         const input = mutationSchemas.deadline_create.parse(raw);
         if (new Date(input.due_at).getTime() < Date.now())
@@ -251,6 +281,7 @@ export function ActionForm({
   reset = false,
   className = "stack",
   payload,
+  disabled = false,
 }: {
   kind: MutationKind;
   children?: ReactNode;
@@ -259,6 +290,7 @@ export function ActionForm({
   reset?: boolean;
   className?: string;
   payload?: Record<string, unknown>;
+  disabled?: boolean;
 }) {
   const act = useContext(ActionContext);
   const [pending, setPending] = useState(false);
@@ -269,6 +301,7 @@ export function ActionForm({
       className={className}
       onSubmit={async (event) => {
         event.preventDefault();
+        if (disabled) return;
         const form = event.currentTarget;
         setPending(true);
         setMessage("");
@@ -303,7 +336,7 @@ export function ActionForm({
       }}
     >
       {children}
-      <button type="submit" className="action-button primary" disabled={pending}>
+      <button type="submit" className="action-button primary" disabled={pending || disabled}>
         {pending ? "Saving…" : label}
       </button>
       {message && (

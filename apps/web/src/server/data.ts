@@ -16,6 +16,8 @@ import {
   notificationSchema,
   preferencesSchema,
   auditSchema,
+  connectImportRecordSchema,
+  connectDataRecordSchema,
   type PortalData,
 } from "@friday/schemas";
 import { requireIdentity } from "@/server/auth";
@@ -35,6 +37,8 @@ export async function portalData(admin = false, onboarding = true): Promise<Port
     "notifications",
     "notification_preferences",
     "notice_reads",
+    "connect_schedule_imports",
+    "connect_data_records",
   ]);
   const tables = [
     "programs",
@@ -51,7 +55,9 @@ export async function portalData(admin = false, onboarding = true): Promise<Port
     tables.map(async (table) => {
       let query = client.from(table).select("*").eq("university_id", user.university_id);
       if (ownerTables.has(table)) query = query.eq("user_id", user.id);
-      const { data, error } = await query.limit(2000);
+      if (table === "connect_data_records")
+        query = query.order("imported_at", { ascending: false });
+      const { data, error } = await query.limit(table === "connect_data_records" ? 100 : 2000);
       if (error)
         throw new Error(
           "Records could not be loaded. Check your connection and database setup, then retry.",
@@ -78,6 +84,8 @@ export async function portalData(admin = false, onboarding = true): Promise<Port
         ),
     }));
   return {
+    connectData: connectDataRecordSchema.array().parse(rows.connect_data_records ?? []),
+    connectImports: connectImportRecordSchema.array().parse(rows.connect_schedule_imports ?? []),
     user: userSchema.parse(user),
     profile: profile ? profileSchema.parse(profile) : null,
     programs: programSchema.array().parse(rows.programs),

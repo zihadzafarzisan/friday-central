@@ -8,8 +8,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "node apps/web/node_modules/next/dist/bin/next dev apps/web --hostname 127.0.0.1",
-    "build": "turbo run build",
+    "extension:package": "node scripts/package-connect-extension.mjs",
+    "dev": "node scripts/package-connect-extension.mjs && node apps/web/node_modules/next/dist/bin/next dev apps/web --hostname 127.0.0.1",
+    "build": "node scripts/package-connect-extension.mjs && turbo run build",
     "start": "node apps/web/node_modules/next/dist/bin/next start apps/web --hostname 127.0.0.1",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",

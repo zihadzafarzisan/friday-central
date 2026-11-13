@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>FRIDAY Connect</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <h1>FRIDAY Connect</h1>
+      <p>
+        Open your schedule or other student pages in Connect, then review and import captured data
+        into FRIDAY.
+      </p>
+      <p id="capture" role="status">Checking this tab…</p>
+      <label class="check"
+        ><input id="capture-other" type="checkbox" />Capture other Connect records while I browse
+        this tab.</label
+      >
+      <p id="data-capture" role="status"></p>
+      <label
+        >FRIDAY site address<input
+          id="origin"
+          type="url"
+          value="http://127.0.0.1:3000"
+          placeholder="https://your-friday-site.example"
+      /></label>
+      <label class="check"
+        ><input id="preview" type="checkbox" />Try in FRIDAY preview (temporary)</label
+      >
+      <label class="check"
+        ><input id="consent" type="checkbox" />Send my captured records to this FRIDAY site for
+        review.</label
+      >
+      <button id="sync" disabled>Review in FRIDAY</button>
+      <button id="sync-data" disabled>Review other records in FRIDAY</button>
+      <button id="forget">Clear captured records</button>
+      <p id="message" role="status"></p>
+      <small
+        >Schedule capture runs automatically. Other JSON GET responses require the checkbox above.
+        Authentication endpoints are excluded; known credential fields are redacted. Review before
+        saving. Captures expire for transfer after 15 minutes and clear when this tab closes or the
+        browser restarts.</small
+      >
+    </main>
+    <script src="shared.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
