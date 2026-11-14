@@ -1,7 +1,6 @@
 "use client";
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { sampleData } from "@friday/db";
 import {
   mutationSchemas,
   deadlineSchema,
@@ -18,8 +17,14 @@ const PreviewContext = createContext<{
   data: PortalData;
   update: (data: PortalData) => void;
 } | null>(null);
-export function PreviewProvider({ children }: { children: ReactNode }) {
-  const [data, update] = useState(() => sampleData());
+export function PreviewProvider({
+  children,
+  initial,
+}: {
+  children: ReactNode;
+  initial: PortalData;
+}) {
+  const [data, update] = useState(initial);
   return <PreviewContext.Provider value={{ data, update }}>{children}</PreviewContext.Provider>;
 }
 export const ActionContext =

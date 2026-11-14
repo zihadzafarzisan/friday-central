@@ -8,6 +8,36 @@ export const ids = {
   nextSemester: "44444444-4444-4444-8444-444444444445",
 };
 export const fixtureId = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+export function emptyPreviewData(admin = false): PortalData {
+  return {
+    user: {
+      id: ids.user,
+      university_id: ids.university,
+      full_name: "",
+      email: "",
+      role: admin ? "super_admin" : "student",
+      status: "active",
+    },
+    profile: null,
+    programs: [],
+    semesters: [],
+    courses: [],
+    sections: [],
+    deadlines: [],
+    notices: [],
+    noticeReads: [],
+    enrollments: [],
+    completed: [],
+    attendance: [],
+    plans: [],
+    notifications: [],
+    preferences: { email_enabled: true, in_app_enabled: true, reduce_effects: false },
+    users: [],
+    audit: [],
+    connectData: [],
+    connectImports: [],
+  };
+}
 export function sampleData(admin = false): PortalData {
   const courses = [
     {

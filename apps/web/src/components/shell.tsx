@@ -141,7 +141,7 @@ export function Shell({
       <main className="workspace" id="main-content" tabIndex={-1}>
         {preview && (
           <div className="demo-banner preview-banner">
-            ◌ Preview · sample records · changes reset on reload. <Link href="/login">Sign in</Link>
+            ◌ Preview · temporary changes reset on reload. <Link href="/login">Sign in</Link>
             <span className="preview-switch">
               <Link href={admin ? "/preview" : "/preview/admin"}>
                 {admin ? "Student preview" : "Admin preview"}

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { sampleData } from "@friday/db";
+import { previewData } from "@/server/preview-data";
 import { StudentPage } from "@/components/student-page";
 import { AdminPage } from "@/components/admin-page";
 import { studentTitles, adminTitles } from "@/lib/routes";
@@ -11,7 +11,7 @@ export default async function Preview({ params }: { params: Promise<{ page?: str
   const parts = admin ? page.slice(1) : page;
   const name = admin ? parts.join("/") : (parts[0] ?? "");
   if (!Object.hasOwn(admin ? adminTitles : studentTitles, name)) notFound();
-  const data = sampleData(admin);
+  const data = previewData(admin);
   const detailId =
     parts[0] === "registration" && parts[1] === "plans"
       ? parts[2]

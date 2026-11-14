@@ -17,7 +17,7 @@ Open `http://127.0.0.1:3000`.
 Dependencies are already installed in this workspace. On Windows, you can also
 start the app with `npm.cmd run dev` without installing pnpm globally.
 
-- `/preview` — every student page, with clearly labeled sample data.
+- `/preview` — every student page, starting with empty records.
 - `/preview/admin` — admin pages and temporary catalog/notice interactions.
 - `/schedules` and `/exams` — public Connect data through a validated server route.
 - `/app` and `/admin` — real protected portals. These require Supabase setup.
@@ -38,9 +38,10 @@ up the project directly in Supabase.
 2. Apply the SQL files in `packages/db/migrations` in filename order. The SQL
    creates tenant/owner policies, the Auth profile trigger, validated save/import
    functions, append-only audit logging, and notice notifications.
-3. For development only, run `packages/db/seed.sql`. It is repeatable and contains
-   a BRACU tenant and a **sample** program/course/section catalog. Replace sample
-   requirements and sections with verified university records before a pilot.
+3. `packages/db/seed.sql` bootstraps only the BRACU tenant. It contains no sample
+   courses, semesters or personal records. Add verified academic records through
+   an administrator. The old sample catalog is isolated in `packages/db/testing`
+   for automated tests; do not load it into the hosted database.
 4. Configure Google OAuth for student sign-in using
    [the Workspace setup guide](docs/google-workspace-auth.md), including the
    Supabase callback and exact app origin. Keep email confirmation and production
@@ -114,6 +115,12 @@ and mock the external schedule response. `BROWSER_EXECUTABLE` can select an
 existing Chromium installation. To test a server already running on port 3100,
 set `FRIDAY_E2E_EXTERNAL_SERVER=1`; the test runner will leave that server alone.
 The CI workflow performs installation, checks, build, and browser tests.
+Playwright explicitly enables `FRIDAY_E2E_FIXTURES=1` on its isolated test server
+so interaction tests retain their catalog fixtures. Normal previews start empty.
+For an external browser-test server, set that flag before starting it; never set
+it on the user-facing development or production app.
+
+For legacy seeded databases, see [demo-data cleanup](docs/demo-data-cleanup.md).
 
 ## Remaining before a real pilot
 

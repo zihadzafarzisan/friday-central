@@ -52,7 +52,7 @@ beforeAll(async () => {
   );
   for (const file of (await readdir(folder)).sort())
     await db.exec(await readFile(new URL(file, folder), "utf8"));
-  const seed = await readFile(new URL("../seed.sql", import.meta.url), "utf8");
+  const seed = await readFile(new URL("../testing/catalog.sql", import.meta.url), "utf8");
   await db.exec(seed);
   await db.exec(seed);
   await addUser(ids.user, "first@g.bracu.ac.bd", "26101001");

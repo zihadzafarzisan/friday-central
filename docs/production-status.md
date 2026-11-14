@@ -37,13 +37,20 @@ and disables academic submission when program/semester choices are unavailable.
 | Database | SQL migrations, repeatable sample seed, tenant/owner RLS, composite tenant FKs, trusted role changes, transactional plan/import validation, append-only admin audit; all 21 hosted tables available and anonymous access denied | Hosted owner-policy inspection and real authenticated persistence acceptance |
 | Notifications | Transactional in-app delivery on notice publication, preferences, emergency override, deduplication, read states | Targeted audiences, scheduled reminders, email/digests |
 
-The public preview lives at `/preview` and `/preview/admin`. Its mutable example
-records reset on reload. `/app` and `/admin` never use demo authentication as a
+The public preview lives at `/preview` and `/preview/admin`. It starts empty;
+temporary mutations reset on reload. Populated fixtures are explicitly enabled
+only for automated browser testing. `/app` and `/admin` never use demo authentication as a
 fallback. Missing Supabase settings disable account actions and preserve login
 redirects.
 
 ## Verification
 
+- Demo-only cleanup: normal previews start empty and regular seeding creates only
+  the BRACU tenant. Seven live preview routes show no old sample records or
+  hydration/runtime errors. Populated fixtures are opt-in on the isolated test
+  server; all 16 browser tests still pass. The selective legacy catalog cleanup
+  is tested for real-data preservation, idempotence, edited rows and dependency
+  rollback, but has not run on the hosted database. See [cleanup steps](demo-data-cleanup.md).
 - OAuth redirect repair: the live development callback returned localhost URLs
   even when requested at 127.0.0.1, opening a separate obsolete prototype that
   returned 404 for `/app`. Every callback branch now uses the configured `APP_URL`.
@@ -59,7 +66,7 @@ redirects.
   seven days. The preceding hosted run passed install, typecheck, lint, all 63
   unit/database tests and production build before those two browser failures.
 - Typecheck passes for all four workspace packages; lint, formatting, and production build pass. The development server starts and its health endpoint responds successfully.
-- 68 unit/schema/PostgreSQL/extension/OAuth tests pass, including actual migration application,
+- 77 unit/schema/PostgreSQL/extension/OAuth tests pass, including actual migration application,
   repeatable seed, tenant filtering, signup role forgery, privilege escalation,
   cross-tenant foreign keys, private deadlines/drafts, account deactivation,
   audit immutability, plan validation, atomic import, notification preferences,

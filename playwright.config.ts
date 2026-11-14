@@ -19,6 +19,7 @@ export default defineConfig({
         command:
           "node apps/web/node_modules/next/dist/bin/next start apps/web --hostname 127.0.0.1 --port 3100",
         url: "http://127.0.0.1:3100/api/health",
+        env: { FRIDAY_E2E_FIXTURES: "1" },
         reuseExistingServer: false,
         timeout: 60000,
       },

@@ -137,7 +137,13 @@ export function StudentPage({
           ]}
         />
         <div className="split-grid">
-          <Card title={`Welcome, ${data.user.full_name.split(" ")[0]}`}>
+          <Card
+            title={
+              data.user.full_name
+                ? `Welcome, ${data.user.full_name.split(" ")[0]}`
+                : "Welcome to FRIDAY"
+            }
+          >
             <p className="muted">A clear view of what needs your attention.</p>
             <div className="actions">
               <Link className="action-button primary" href={`${base}/schedule`}>

@@ -59,7 +59,7 @@ function NoticeFields({ notice }: { notice?: Notice }) {
 }
 function ImportCourses() {
   const act = useContext(ActionContext);
-  const [csv, setCsv] = useState("code,title,credits\nCSE220,Data structures,3");
+  const [csv, setCsv] = useState("code,title,credits\n");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   // Restrict this small synchronous importer to a documented, unquoted format.
@@ -151,7 +151,7 @@ export function AdminPage({
     else next.delete("q");
     router.replace(pathname + "?" + next, { scroll: false });
   }
-  const users = preview ? [{ ...data.user, role: "student" as const }, ...data.users] : data.users;
+  const users = data.users;
   let content;
   if (name === "")
     content = (

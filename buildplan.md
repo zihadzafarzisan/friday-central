@@ -16,12 +16,12 @@
 
 | Field | Value |
 |---|---|
-| Last task completed | Fixed OAuth callbacks leaving the configured app origin and opening the obsolete localhost prototype |
+| Last task completed | Removed automatic demo records from previews/seeding and tested a selective hosted sample cleanup |
 | Completed date | November 14, 2026 |
-| Current next task | Retry real BRACU Google sign-in at 127.0.0.1:3000, verify private Connect import persistence, and provision the verified academic catalog |
+| Current next task | Connect administrative Supabase access or run the tested sample-catalog cleanup in SQL Editor, then import real Connect records |
 | Current owner | Project team |
-| Status | OAuth redirect repair verified locally; real student account acceptance pending |
-| Notes | Next.js normalized the callback request URL to localhost, where a separate old prototype returned 404 for /app. All callback branches now use the trusted APP_URL, matching OAuth initiation. New origin-regression cases failed before the fix and pass afterward. All 68 unit/database tests, web lint, production TypeScript/build and live callback redirect checks pass. No student account was signed in by the agent. |
+| Status | Local demo cleanup verified; hosted cleanup pending administrative access |
+| Notes | User selected demo/sample data only. Normal previews now start empty, normal seeding bootstraps only BRACU, and test fixtures are opt-in on the isolated browser-test server. A tested transaction removes only 12 unchanged legacy catalog seed rows, preserves accounts/private records and rolls back on student references, JSON plan items or edited sample rows. All 77 unit/database tests and 16 browser tests pass, as do lint, type checks and build. No hosted deletion was performed: the Supabase plugin is unconnected and only the public app key is configured. Extension download is verified and real Connect capture/import steps are documented. |
 
 ### Task update format
 
@@ -658,6 +658,8 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Date | Task | Result | Next action |
 |---|---|---|---|
+| November 14, 2026 | Demo-only cleanup and Connect import handoff | Removed automatic preview demo rows and default catalog seeding, isolated populated test fixtures, and prepared/tested a selective SQL cleanup that preserves real data. Verified empty live previews, 77 unit/database tests, 16 browser tests, lint, build/typecheck and the extension ZIP. Hosted cleanup remains unapplied without administrative access. | Run the reviewed SQL through a connected administrator or SQL Editor; capture/review real Connect records with the extension |
+| November 14, 2026 | Local onboarding hydration recovery | Archived stale generated development output and restarted the current FRIDAY server. Verified matching server/client onboarding headings, interactive controls, reload and zero hydration/runtime errors using a fresh preview browser; preserved browser login cookies. No application rendering changes. | Hard-refresh the authenticated onboarding page and continue student acceptance |
 | November 14, 2026 | OAuth callback origin repair | Confirmed the current server's callback changed 127.0.0.1 to localhost and reached an obsolete prototype. Callback success, errors and recovery now return to APP_URL. All 68 unit/database tests, lint, build/typecheck and live error/cancellation redirect probes pass. | Retry real Google student sign-in; deployment is not required for this local fix |
 | November 14, 2026 | CI browser navigation repair | Confirmed both failures came from interacting before client navigation committed; the planner failure also affected the previous commit. Added destination assertions and an explicit eligible-course selector, plus retained failure diagnostics. Ten targeted repeated checks and all 16 browser tests pass locally. | Publish the fix and verify GitHub Actions, then resume real student acceptance |
 | November 14, 2026 | Hosted schema verification and import-first onboarding | All 21 tables return expected anonymous permission denials instead of missing-table errors. New students can import private Connect data before academic onboarding; catalog-dependent submission remains disabled until choices exist. 63 unit/database and 16 browser tests pass, plus static checks/build. | Real Google account sign-in and saved Connect import acceptance; authoritative program/semester setup |
@@ -679,6 +681,7 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Date | Change | Reason |
 |---|---|---|
+| November 14, 2026 | Empty default previews/seeding and selective legacy sample-catalog cleanup | User requested demo/sample data removal while preserving real accounts and saved records; keep fixtures available only for isolated automated tests |
 | November 14, 2026 | Resolve every auth callback redirect against the configured APP_URL | Keep redirects and PKCE cookies on the same app origin when Next.js or a reverse proxy rewrites the request hostname |
 | November 14, 2026 | Wait for destination pages in planner/history browser tests and upload failure diagnostics in CI | Fast test actions could check the old page's checkbox or go back before navigation committed; preserve screenshots/traces for future failures |
 | November 14, 2026 | Allowed only setup/private-import pages and actions before academic onboarding | Newly signed-in students should not be blocked from importing their own records while the authoritative catalog is being configured; session, Workspace, role and owner checks remain enforced |
