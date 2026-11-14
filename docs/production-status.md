@@ -44,6 +44,13 @@ redirects.
 
 ## Verification
 
+- OAuth redirect repair: the live development callback returned localhost URLs
+  even when requested at 127.0.0.1, opening a separate obsolete prototype that
+  returned 404 for `/app`. Every callback branch now uses the configured `APP_URL`.
+  Regression tests cover rewritten request origins for successful login, denied
+  identities, provider cancellation, expired links and recovery. Live cancellation
+  and expired-link probes now stay on 127.0.0.1. Real Google sign-in remains a
+  student acceptance step.
 - CI navigation repair: planner and history tests now assert the destination URL
   and heading before interacting. The original planner failure was reproduced
   with a held navigation response, and the history failure reproduced locally.
@@ -52,7 +59,7 @@ redirects.
   seven days. The preceding hosted run passed install, typecheck, lint, all 63
   unit/database tests and production build before those two browser failures.
 - Typecheck passes for all four workspace packages; lint, formatting, and production build pass. The development server starts and its health endpoint responds successfully.
-- 63 unit/schema/PostgreSQL/extension/OAuth tests pass, including actual migration application,
+- 68 unit/schema/PostgreSQL/extension/OAuth tests pass, including actual migration application,
   repeatable seed, tenant filtering, signup role forgery, privilege escalation,
   cross-tenant foreign keys, private deadlines/drafts, account deactivation,
   audit immutability, plan validation, atomic import, notification preferences,

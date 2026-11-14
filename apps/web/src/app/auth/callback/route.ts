@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { supabase } from "@/lib/supabase/server";
+import { environment } from "@/lib/env";
 import { safeNext, studentDestination, isStudentGoogleUser } from "@friday/schemas";
 export async function GET(request: NextRequest) {
+  // The request origin can be rewritten by Next.js or a reverse proxy.
+  const appUrl = environment().appUrl;
   const client = await supabase();
   const code = request.nextUrl.searchParams.get("code");
   const next = request.nextUrl.searchParams.get("next");
@@ -15,7 +18,7 @@ export async function GET(request: NextRequest) {
       } = await client.auth.getUser();
       if (userError || !user || !isStudentGoogleUser(user)) {
         await client.auth.signOut({ scope: "local" });
-        return NextResponse.redirect(new URL("/login?error=workspace", request.url));
+        return NextResponse.redirect(new URL("/login?error=workspace", appUrl));
       }
       const { data: account } = await client
         .from("users")
@@ -24,15 +27,15 @@ export async function GET(request: NextRequest) {
         .single();
       if (account?.role !== "student" || account?.status !== "active") {
         await client.auth.signOut({ scope: "local" });
-        return NextResponse.redirect(new URL("/login?error=account", request.url));
+        return NextResponse.redirect(new URL("/login?error=account", appUrl));
       }
-      return NextResponse.redirect(new URL(studentDestination(next), request.url));
+      return NextResponse.redirect(new URL(studentDestination(next), appUrl));
     }
     if (!error)
       return NextResponse.redirect(
-        new URL(next === "/reset-password" ? next : safeNext(next), request.url),
+        new URL(next === "/reset-password" ? next : safeNext(next), appUrl),
       );
   }
-  if (google) return NextResponse.redirect(new URL("/login?error=google", request.url));
-  return NextResponse.redirect(new URL("/verify?error=expired", request.url));
+  if (google) return NextResponse.redirect(new URL("/login?error=google", appUrl));
+  return NextResponse.redirect(new URL("/verify?error=expired", appUrl));
 }

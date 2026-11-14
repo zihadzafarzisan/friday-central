@@ -16,6 +16,10 @@ and [Supabase's Google provider guide](https://supabase.com/docs/guides/auth/soc
    `apps/web/.env.local` using `.env.example`. `APP_URL` must match the browser's
    origin, including scheme, hostname and port. Use `http://127.0.0.1:3000` locally
    by default; mixing localhost and 127.0.0.1 breaks PKCE cookies and extension transfers.
+   OAuth initiation and all callback outcomes use this configured origin, since
+   Next.js or a reverse proxy can rewrite the callback request hostname. For a
+   Vercel deployment, set `APP_URL` to the deployed HTTPS origin and add its
+   callback destination to Supabase's redirect allowlist before testing sign-in.
 2. Apply every versioned migration in order, including
    `202611120002_google_workspace_auth.sql` and
    `202611120003_connect_data_archive.sql`. `npm run db:prepare` stages them for

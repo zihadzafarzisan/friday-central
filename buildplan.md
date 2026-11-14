@@ -16,12 +16,12 @@
 
 | Field | Value |
 |---|---|
-| Last task completed | Corrected the CI browser navigation races and added retained failure diagnostics |
+| Last task completed | Fixed OAuth callbacks leaving the configured app origin and opening the obsolete localhost prototype |
 | Completed date | November 14, 2026 |
-| Current next task | Sign in with a real BRACU Google account, verify private Connect import persistence, and provision the verified academic catalog |
+| Current next task | Retry real BRACU Google sign-in at 127.0.0.1:3000, verify private Connect import persistence, and provision the verified academic catalog |
 | Current owner | Project team |
-| Status | CI browser-test correction verified locally; real student account acceptance pending |
-| Notes | Reproduced the back-navigation race locally and the planner race with a held navigation response. Both tests now wait for destination URL and heading; registration selects MAT215 explicitly. Ten repeated targeted checks and the full 16-test browser suite pass. CI retains failure screenshots/traces for seven days. The previous hosted run already passed install, typecheck, lint, 63 unit/database tests and production build. |
+| Status | OAuth redirect repair verified locally; real student account acceptance pending |
+| Notes | Next.js normalized the callback request URL to localhost, where a separate old prototype returned 404 for /app. All callback branches now use the trusted APP_URL, matching OAuth initiation. New origin-regression cases failed before the fix and pass afterward. All 68 unit/database tests, web lint, production TypeScript/build and live callback redirect checks pass. No student account was signed in by the agent. |
 
 ### Task update format
 
@@ -658,6 +658,7 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Date | Task | Result | Next action |
 |---|---|---|---|
+| November 14, 2026 | OAuth callback origin repair | Confirmed the current server's callback changed 127.0.0.1 to localhost and reached an obsolete prototype. Callback success, errors and recovery now return to APP_URL. All 68 unit/database tests, lint, build/typecheck and live error/cancellation redirect probes pass. | Retry real Google student sign-in; deployment is not required for this local fix |
 | November 14, 2026 | CI browser navigation repair | Confirmed both failures came from interacting before client navigation committed; the planner failure also affected the previous commit. Added destination assertions and an explicit eligible-course selector, plus retained failure diagnostics. Ten targeted repeated checks and all 16 browser tests pass locally. | Publish the fix and verify GitHub Actions, then resume real student acceptance |
 | November 14, 2026 | Hosted schema verification and import-first onboarding | All 21 tables return expected anonymous permission denials instead of missing-table errors. New students can import private Connect data before academic onboarding; catalog-dependent submission remains disabled until choices exist. 63 unit/database and 16 browser tests pass, plus static checks/build. | Real Google account sign-in and saved Connect import acceptance; authoritative program/semester setup |
 | November 14, 2026 | Google verification and SQL Editor bootstrap | Verified Google enabled and correct OAuth callback routing using a cancelled test flow. Prepared and tested a transaction-safe single-file setup with tenant/bootstrap data and explicit privilege restrictions; 57 tests pass. | Run generated SQL in the project's SQL Editor, then verify hosted schema and real student auth |
@@ -678,6 +679,7 @@ The MVP can be released to a pilot only when all of the following are true:
 
 | Date | Change | Reason |
 |---|---|---|
+| November 14, 2026 | Resolve every auth callback redirect against the configured APP_URL | Keep redirects and PKCE cookies on the same app origin when Next.js or a reverse proxy rewrites the request hostname |
 | November 14, 2026 | Wait for destination pages in planner/history browser tests and upload failure diagnostics in CI | Fast test actions could check the old page's checkbox or go back before navigation committed; preserve screenshots/traces for future failures |
 | November 14, 2026 | Allowed only setup/private-import pages and actions before academic onboarding | Newly signed-in students should not be blocked from importing their own records while the authoritative catalog is being configured; session, Workspace, role and owner checks remain enforced |
 | November 14, 2026 | Added a tested SQL Editor setup generator and hardened inherited Connect table grants | Make hosted first setup concrete without a management connection; support existing Auth accounts and deny inherited anonymous/TRUNCATE privileges |

@@ -92,6 +92,27 @@ describe("Google student OAuth flow", () => {
     );
     expect(mocks.client.auth.getUser).toHaveBeenCalled();
   });
+  it.each(["http://localhost:3000", "http://internal-proxy:8080"])(
+    "returns to the configured app when the callback request origin is %s",
+    async (origin) => {
+      const response = await GET(
+        new NextRequest(
+          `${origin}/auth/callback?flow=student-google&code=test&next=%2Fapp%2Fschedule%3FconnectImport%3D1`,
+        ),
+      );
+      expect(response.headers.get("location")).toBe(
+        "https://friday.example/app/schedule?connectImport=1",
+      );
+    },
+  );
+  it.each([
+    ["flow=student-google&error=access_denied", "/login?error=google"],
+    ["", "/verify?error=expired"],
+    ["code=test&next=/reset-password", "/reset-password"],
+  ])("keeps callback %s on the configured app origin", async (query, destination) => {
+    const response = await GET(new NextRequest(`http://localhost:3000/auth/callback?${query}`));
+    expect(response.headers.get("location")).toBe(`https://friday.example${destination}`);
+  });
   it("signs out identities without Google's verified Workspace claim, even with forged metadata", async () => {
     mocks.client.auth.getUser.mockResolvedValue({
       data: {
@@ -104,7 +125,7 @@ describe("Google student OAuth flow", () => {
       error: null,
     });
     const response = await GET(
-      new NextRequest("https://friday.example/auth/callback?flow=student-google&code=test"),
+      new NextRequest("http://localhost:3000/auth/callback?flow=student-google&code=test"),
     );
     expect(response.headers.get("location")).toBe("https://friday.example/login?error=workspace");
     expect(mocks.client.auth.signOut).toHaveBeenCalled();
@@ -112,7 +133,7 @@ describe("Google student OAuth flow", () => {
   it("rejects inactive/admin accounts and handles provider cancellation", async () => {
     mocks.single.mockResolvedValue({ data: { role: "admin", status: "active" } });
     const response = await GET(
-      new NextRequest("https://friday.example/auth/callback?flow=student-google&code=test"),
+      new NextRequest("http://localhost:3000/auth/callback?flow=student-google&code=test"),
     );
     expect(response.headers.get("location")).toBe("https://friday.example/login?error=account");
     const canceled = await GET(
